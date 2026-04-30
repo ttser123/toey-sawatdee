@@ -6,7 +6,6 @@ import { signIn } from 'aws-amplify/auth';
 import { Amplify } from 'aws-amplify';
 import { useRouter } from 'next/navigation';
 
-// 1. ผูก Amplify เข้ากับ Cognito ของมึง (บอกทะเบียนบ้าน)
 Amplify.configure({
     Auth: {
         Cognito: {
