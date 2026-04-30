@@ -1,0 +1,39 @@
+name: Deploy Resume to AWS
+on:
+  push:
+    branches: [ main ] # พ่นขึ้น S3 เฉพาะตอน push เข้า main branch เท่านั้น
+
+permissions:
+  id-token: write # จำเป็นสำหรับการใช้ OIDC
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install & Build
+        run: |
+          npm install
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::321209672585:role/GitHubAction-S3-CloudFront
+          aws-region: ap-southeast-2
+
+      - name: Deploy to S3
+        run: aws s3 sync out/ s3://toey-serverless-resume --delete
+
+      - name: CloudFront Invalidation
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*"
