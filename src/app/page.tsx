@@ -40,7 +40,6 @@ export default function ResumePage() {
 
         <div className="space-y-4 text-gray-300">
           <p>🔥 ทักษะ: AWS, Serverless, Terraform, Docker, CI/CD</p>
-          <p>🎯 เป้าหมาย: System Administrator / DevOps ที่ออสเตรเลีย</p>
         </div>
 
         {/* ตรงนี้แหละคือที่แสดงตัวเลขคนเข้าเว็บ! */}

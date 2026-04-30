@@ -1,10 +1,10 @@
 name: Deploy Resume to AWS
 on:
   push:
-    branches: [ main ] # พ่นขึ้น S3 เฉพาะตอน push เข้า main branch เท่านั้น
+    branches: [ main ]
 
 permissions:
-  id-token: write # จำเป็นสำหรับการใช้ OIDC
+  id-token: write 
   contents: read
 
 jobs:
