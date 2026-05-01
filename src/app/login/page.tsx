@@ -18,7 +18,7 @@ function LoginForm() {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const callbackUrl = searchParams.get('callbackUrl') || '/admin/dashboard';
+    const callbackUrl = searchParams.get('callbackUrl') || '/admin/server-status';
 
     // If already logged in, redirect directly to the callback or dashboard
     useEffect(() => {
@@ -118,7 +118,7 @@ function LoginForm() {
                                 <span>Authenticating...</span>
                             </>
                         ) : (
-                            'Sign In to Dashboard'
+                            'Sign In to Server Status'
                         )}
                     </button>
                 </form>
