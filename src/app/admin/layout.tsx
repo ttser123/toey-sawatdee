@@ -2,21 +2,19 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
-    const { isAuthenticated, isLoading, openLoginModal } = useAuth();
+    const pathname = usePathname();
+    const { isAuthenticated, isLoading } = useAuth();
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.replace('/');
-            setTimeout(() => {
-                openLoginModal();
-            }, 100);
+            router.replace(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
         }
-    }, [isLoading, isAuthenticated, router, openLoginModal]);
+    }, [isLoading, isAuthenticated, router, pathname]);
 
     if (isLoading) {
         return (

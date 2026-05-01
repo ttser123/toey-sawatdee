@@ -1,19 +1,23 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import AuthProvider from '@/components/AuthProvider';
 import Sidebar from '@/components/Sidebar';
-import LoginModal from '@/components/LoginModal';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+
+    // Isolated Layout for Login
+    if (pathname === '/login') {
+        return <AuthProvider>{children}</AuthProvider>;
+    }
+
     return (
         <AuthProvider>
-            <div className="flex h-screen bg-gray-50">
+            <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden">
                 <Sidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    {children}
-                </div>
+                {children}
             </div>
-            <LoginModal />
         </AuthProvider>
     );
 }

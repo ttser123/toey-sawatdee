@@ -10,9 +10,6 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     userEmail: string;
-    isLoginModalOpen: boolean;
-    openLoginModal: () => void;
-    closeLoginModal: () => void;
     logout: () => Promise<void>;
     refreshAuth: () => Promise<void>;
 }
@@ -21,9 +18,6 @@ const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
     isLoading: true,
     userEmail: '',
-    isLoginModalOpen: false,
-    openLoginModal: () => {},
-    closeLoginModal: () => {},
     logout: async () => {},
     refreshAuth: async () => {},
 });
@@ -36,7 +30,6 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [userEmail, setUserEmail] = useState('');
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const refreshAuth = useCallback(async () => {
         try {
@@ -61,13 +54,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         setUserEmail('');
     };
 
-    const openLoginModal = () => setIsLoginModalOpen(true);
-    const closeLoginModal = () => setIsLoginModalOpen(false);
-
     return (
         <AuthContext.Provider value={{ 
             isAuthenticated, isLoading, userEmail, 
-            isLoginModalOpen, openLoginModal, closeLoginModal, 
             logout, refreshAuth 
         }}>
             {children}
