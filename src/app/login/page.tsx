@@ -1,6 +1,6 @@
 // src/app/login/page.tsx
 'use client';
-
+import '@/lib/amplify-config';
 import { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'aws-amplify/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -30,6 +30,7 @@ function LoginForm() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
+        console.log("🔥 CHECK ENV:", process.env.NEXT_PUBLIC_USER_POOL_ID);
         setErrorMsg('');
 
         try {
