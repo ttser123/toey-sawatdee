@@ -1,58 +1,55 @@
-'use client'; // บังคับให้ไฟล์นี้ทำงานฝั่ง Client (Browser) เพราะเราต้องใช้ useEffect ดึง API
+// src/app/page.tsx — Overview (หน้าแรก)
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function ResumePage() {
-  // สร้าง State มารับค่าตัวเลข ค่าเริ่มต้นคือ 0 หรือสถานะโหลด
-  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+export default function Home() {
+    const [visitorCount, setVisitorCount] = useState<number | string>('...');
 
-  useEffect(() => {
-    // ฟังก์ชันสำหรับดึงข้อมูลจาก API
-    const fetchVisitorCount = async () => {
-      try {
-        // ดึง URL มาจาก .env 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        if (!apiUrl) throw new Error("มึงลืมใส่ URL ใน .env!");
+    useEffect(() => {
+        const fetchCounter = async () => {
+            try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+                if (!apiUrl) return;
+                const res = await fetch(`${apiUrl}/visitor`, { method: 'POST' });
+                if (res.ok) {
+                    const json = await res.json();
+                    setVisitorCount(json.views ?? json.count ?? '—');
+                }
+            } catch (err) {
+                console.error('Counter fetch failed:', err);
+                setVisitorCount('—');
+            }
+        };
+        fetchCounter();
+    }, []);
 
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("API พัง!");
+    return (
+        <main className="flex-1 overflow-auto bg-gray-50 p-6 md:p-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Overview</h1>
 
-        const data = await response.json();
-        setVisitorCount(data.count); // เอาตัวเลขที่ได้ ยัดใส่ State
-      } catch (error) {
-        console.error("เกิดข้อผิดพลาด:", error);
-      }
-    };
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Profile Card */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Admin Contact</h2>
+                    <div className="space-y-3">
+                        <div className="flex justify-between">
+                            <span className="text-sm text-gray-500">Name</span>
+                            <span className="text-sm font-medium text-gray-900">Parinya Sawatdee (Toey)</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-sm text-gray-500">Role</span>
+                            <span className="text-sm font-medium text-gray-900">Cloud & Network Engineer</span>
+                        </div>
+                    </div>
+                </div>
 
-    fetchVisitorCount(); // สั่งให้ฟังก์ชันทำงาน
-  }, []); // Array ว่างๆ [] หมายความว่าให้ทำแค่ "ครั้งเดียว" ตอนที่เปิดเว็บมา
-
-  return (
-    <main className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-8">
-      <div className="max-w-2xl bg-gray-800 rounded-xl shadow-2xl p-8 border border-gray-700">
-
-        <h1 className="text-4xl font-extrabold text-blue-400 mb-4">
-          Parinya Sawatdee (Toey)
-        </h1>
-        <h2 className="text-xl text-gray-400 mb-8 border-b border-gray-700 pb-4">
-          Cloud Infrastructure & DevSecOps Engineer
-        </h2>
-
-        <div className="space-y-4 text-gray-300">
-          <p>🔥 ทักษะ: AWS, Serverless, Terraform, Docker, CI/CD</p>
-        </div>
-
-        {/* ตรงนี้แหละคือที่แสดงตัวเลขคนเข้าเว็บ! */}
-        <div className="mt-12 bg-gray-900 rounded-lg p-4 text-center border border-gray-700 shadow-inner">
-          <p className="text-sm text-gray-400 uppercase tracking-widest">
-            Profile Views
-          </p>
-          <p className="text-5xl font-black text-green-400 mt-2">
-            {visitorCount !== null ? visitorCount : "..."}
-          </p>
-        </div>
-
-      </div>
-    </main>
-  );
+                {/* Visitor Counter Card */}
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Profile Views</h2>
+                    <p className="text-4xl font-bold text-blue-600">{visitorCount}</p>
+                </div>
+            </div>
+        </main>
+    );
 }

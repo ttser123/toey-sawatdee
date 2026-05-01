@@ -1,10 +1,9 @@
+// src/app/admin/homelab/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
-
-// ⚠️ ใส่ URL จริงของ API มึงตรงนี้!
-const API_URL = "https://z6nzmodjph.execute-api.ap-southeast-2.amazonaws.com/homelab/status";
+import '@/lib/amplify-config'; // BUG #4 FIX: Import Amplify config so fetchAuthSession works reliably!
 
 interface ServerStatus {
     sort_key: string;
@@ -19,96 +18,99 @@ export default function HomelabPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // ฟังก์ชันดึงข้อมูลจาก API พร้อมแนบ Token
     const fetchData = async () => {
         try {
             setLoading(true);
+            setError('');
 
-            // 1. ไปฉก JWT Token ที่ Amplify ซ่อนไว้ใน LocalStorage ออกมา!
             const session = await fetchAuthSession();
             const token = session.tokens?.accessToken?.toString();
 
-            if (!token) throw new Error("No Token! มึงแอบเข้ามาได้ไงเนี่ย!");
+            if (!token) throw new Error("No Token available. Unauthorized.");
 
-            // 2. ยิง API พร้อมแนบ Token ไปใน Header ให้ รปภ. Cognito ดู
-            const res = await fetch(API_URL, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+            if (!apiUrl) throw new Error('API URL not configured');
+
+            const res = await fetch(`${apiUrl}/homelab/status`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
-            if (!res.ok) throw new Error(`API พัง! รหัส: ${res.status}`);
+            if (!res.ok) throw new Error(`API Error: ${res.status}`);
 
-            // 3. แกะกล่องข้อมูล
             const json = await res.json();
             setServerData(json.data || []);
-
         } catch (err: any) {
-            console.error(err);
-            setError(err.message);
+            console.error('Fetch homelab status failed:', err);
+            setError(err.message || 'An error occurred');
         } finally {
             setLoading(false);
         }
     };
 
-    // ให้มันดึงข้อมูลทันทีที่เปิดหน้านี้ขึ้นมา
     useEffect(() => {
         fetchData();
     }, []);
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
-                <h1 className="text-3xl font-bold">Homelab Status</h1>
-                {/* ปุ่ม Refresh ข้อมูล */}
-                <button
-                    onClick={fetchData}
-                    className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded font-bold transition-colors"
-                >
-                    {loading ? 'กำลังโหลด...' : 'รีเฟรช'}
-                </button>
-            </div>
+        <main className="flex-1 overflow-auto bg-gray-50 p-6 md:p-8">
+            <div className="max-w-5xl mx-auto">
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-gray-900">Homelab Status</h1>
+                    <button
+                        onClick={fetchData}
+                        disabled={loading}
+                        className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors disabled:opacity-50 shadow-sm"
+                    >
+                        {loading ? 'Loading...' : 'Refresh'}
+                    </button>
+                </div>
 
-            {error && <p className="text-red-500 mb-4 bg-red-500/10 p-4 border border-red-500 rounded">Error: {error}</p>}
+                {error && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                        {error}
+                    </div>
+                )}
 
-            {loading ? (
-                <p className="text-gray-400">กำลังดูดข้อมูลจาก DynamoDB...</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {serverData.length === 0 ? (
-                        <p className="text-gray-400 col-span-full">ไม่พบข้อมูลเซิร์ฟเวอร์!</p>
-                    ) : (
-                        serverData.map((server) => {
-                            // ตัดคำว่า 'SERVER#' ออกจากชื่อ
+                {loading ? (
+                    <p className="text-gray-400 text-sm animate-pulse">Fetching data from DynamoDB...</p>
+                ) : serverData.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No server data found.</p>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {serverData.map((server) => {
                             const name = server.sort_key.replace('SERVER#', '');
+                            const isOnline = server.status === 'Online';
                             return (
-                                <div key={server.sort_key} className="bg-gray-800 p-6 rounded-lg border border-gray-700 shadow-md relative overflow-hidden">
-
-                                    {/* แถบสีด้านบนโง่ๆ ให้ดูสวย */}
-                                    <div className={`absolute top-0 left-0 w-full h-1 ${server.status === 'Online' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-
-                                    <h3 className="text-xl font-semibold mb-2">{name}</h3>
-
-                                    <div className="flex items-center mb-4">
-                                        <span className={`w-3 h-3 rounded-full mr-2 ${server.status === 'Online' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
-                                        <span className={server.status === 'Online' ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                                <div key={server.sort_key} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 relative overflow-hidden">
+                                    <div className={`absolute top-0 left-0 w-full h-1 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                                    <div className="flex items-center justify-between mb-4 pt-1">
+                                        <h3 className="font-semibold text-gray-900">{name}</h3>
+                                        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
+                                            isOnline ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                                        }`}>
                                             {server.status}
                                         </span>
                                     </div>
-
-                                    <div className="text-sm text-gray-300 space-y-2 bg-gray-900/50 p-3 rounded">
-                                        <p className="flex justify-between"><span>Ping:</span> <span>{server.ping}</span></p>
-                                        <p className="flex justify-between"><span>Players:</span> <span>{server.players}</span></p>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between py-1.5 border-b border-gray-100">
+                                            <span className="text-gray-500">Ping</span>
+                                            <span className="font-medium text-gray-900">{server.ping}</span>
+                                        </div>
+                                        <div className="flex justify-between py-1.5 border-b border-gray-100">
+                                            <span className="text-gray-500">Players</span>
+                                            <span className="font-medium text-gray-900">{server.players}</span>
+                                        </div>
                                     </div>
-
-                                    <p className="text-xs text-gray-500 mt-4 text-right">อัปเดตล่าสุด: {server.last_updated}</p>
+                                    <p className="text-xs text-gray-400 mt-3 text-right">Updated: {server.last_updated}</p>
                                 </div>
                             );
-                        })
-                    )}
-                </div>
-            )}
-        </div>
+                        })}
+                    </div>
+                )}
+            </div>
+        </main>
     );
 }
