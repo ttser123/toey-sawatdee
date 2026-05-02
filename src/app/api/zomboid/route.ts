@@ -10,12 +10,11 @@ const dbClient = new DynamoDBClient({
     },
 });
 
-// Revalidate cached response every 60 seconds
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Default payload returned when the server record is missing or unreachable
-const OFFLINE_DEFAULTS = {
+// ลอจิก Senior: เปลี่ยนเป็น Function ซะ! เพื่อให้ new Date() ถูกรันใหม่ทุกครั้งที่ถูกเรียกใช้
+const getOfflineDefaults = () => ({
     id: "SERVER_1",
     serverName: "Project Zomboid Server",
     map: "—",
@@ -23,25 +22,22 @@ const OFFLINE_DEFAULTS = {
     maxPlayers: 0,
     ping: 0,
     status: "OFFLINE" as const,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString(), // ตอนนี้เวลามันจะเดินเป็นปัจจุบันแล้ว!
     playersList: [],
-};
+});
 
 export async function GET() {
     try {
         const params = {
             TableName: "ZomboidStatus",
-            Key: {
-                id: { S: "SERVER_1" },
-            },
+            Key: { id: { S: "SERVER_1" } },
         };
 
         const { Item } = await dbClient.send(new GetItemCommand(params));
 
-        // If no record exists yet, return defaults so the UI always renders
         if (!Item) {
             return NextResponse.json(
-                { success: true, data: OFFLINE_DEFAULTS },
+                { success: true, data: getOfflineDefaults() }, // 🚨 เรียกใช้เป็น Function
                 { status: 200 },
             );
         }
@@ -55,9 +51,8 @@ export async function GET() {
     } catch (error: any) {
         console.error("[API] Zomboid fetch error:", error.message);
 
-        // Return the offline defaults so the page still renders gracefully
         return NextResponse.json(
-            { success: true, data: OFFLINE_DEFAULTS },
+            { success: true, data: getOfflineDefaults() }, // 🚨 เรียกใช้เป็น Function
             { status: 200 },
         );
     }
