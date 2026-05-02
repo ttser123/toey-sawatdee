@@ -13,8 +13,19 @@ type ReleaseNote = {
 const releaseNotes: ReleaseNote[] = [
   {
     date: 'May 2, 2026',
-    title: 'Project Zomboid Server Integration',
+    title: 'Zomboid Dashboard Redesign & Stability',
     isLatest: true,
+    changes: [
+      'Redesigned **ZomboidStatus** component to always display all stat fields (Map, Players, Ping, Last Update) even when the server is offline — showing zero / placeholder values.',
+      'Refactored **Zomboid API route** with graceful offline defaults so the page never renders an error state.',
+      'Aligned the Zomboid page to the project **design system** (white cards, Material Symbols icons, consistent spacing).',
+      'Converted all Thai text and comments to **English** across the Zomboid module for codebase consistency.',
+      'Added an **offline hint banner** explaining auto-refresh behavior to visitors.'
+    ]
+  },
+  {
+    date: 'May 2, 2026',
+    title: 'Project Zomboid Server Integration',
     changes: [
       'Integrated real-time **Project Zomboid Server Dashboard** into the public view.',
       'Developed robust backend API polling leveraging the **gamedig** library.',

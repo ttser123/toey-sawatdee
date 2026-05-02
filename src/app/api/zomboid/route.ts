@@ -2,7 +2,6 @@ import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { NextResponse } from "next/server";
 
-// 1. ตั้งค่าเชื่อมต่อ AWS แบบปลอดภัย (กุญแจจะถูกซ่อนอยู่ฝั่ง Server เท่านั้น!)
 const dbClient = new DynamoDBClient({
     region: process.env.AWS_REGION,
     credentials: {
@@ -11,32 +10,54 @@ const dbClient = new DynamoDBClient({
     },
 });
 
-// 2. ลอจิก Senior (Trade-off): บังคับ Cache ข้อมูลไว้ 60 วินาที
+// Revalidate cached response every 60 seconds
 export const revalidate = 60;
+
+// Default payload returned when the server record is missing or unreachable
+const OFFLINE_DEFAULTS = {
+    id: "SERVER_1",
+    serverName: "Project Zomboid Server",
+    map: "—",
+    onlinePlayers: 0,
+    maxPlayers: 0,
+    ping: 0,
+    status: "OFFLINE" as const,
+    timestamp: new Date().toISOString(),
+    playersList: [],
+};
 
 export async function GET() {
     try {
         const params = {
             TableName: "ZomboidStatus",
             Key: {
-                id: { S: "SERVER_1" } // ชี้เป้าไปที่ Row เดียวกับที่สปายเราเขียนไว้
-            }
+                id: { S: "SERVER_1" },
+            },
         };
 
-        // 3. ยิงคำสั่งดึงข้อมูล
         const { Item } = await dbClient.send(new GetItemCommand(params));
 
+        // If no record exists yet, return defaults so the UI always renders
         if (!Item) {
-            return NextResponse.json({ error: "ไม่พบข้อมูลเซิร์ฟเวอร์" }, { status: 404 });
+            return NextResponse.json(
+                { success: true, data: OFFLINE_DEFAULTS },
+                { status: 200 },
+            );
         }
 
-        // 4. แปลงภาษาต่างดาวของ DynamoDB กลับเป็น JSON ปกติ
         const serverData = unmarshall(Item);
 
-        return NextResponse.json({ success: true, data: serverData }, { status: 200 });
-
+        return NextResponse.json(
+            { success: true, data: serverData },
+            { status: 200 },
+        );
     } catch (error: any) {
-        console.error("❌ [API Error]:", error.message);
-        return NextResponse.json({ error: "ดึงข้อมูลล้มเหลว", details: error.message }, { status: 500 });
+        console.error("[API] Zomboid fetch error:", error.message);
+
+        // Return the offline defaults so the page still renders gracefully
+        return NextResponse.json(
+            { success: true, data: OFFLINE_DEFAULTS },
+            { status: 200 },
+        );
     }
 }
