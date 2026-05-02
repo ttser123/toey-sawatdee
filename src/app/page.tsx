@@ -1,6 +1,7 @@
 // src/app/page.tsx — Overview (Home)
 'use client';
 
+
 import ReleaseNotes from '@/components/ReleaseNotes';
 
 export default function Home() {
