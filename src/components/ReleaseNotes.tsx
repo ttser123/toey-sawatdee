@@ -12,9 +12,18 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 2, 2026',
+    title: 'Project Zomboid Server Integration',
+    isLatest: true,
+    changes: [
+      'Integrated real-time **Project Zomboid Server Dashboard** into the public view.',
+      'Developed robust backend API polling leveraging the **gamedig** library.',
+      'Refactored **ZomboidStatus** component for centralized server monitoring.'
+    ]
+  },
+  {
     date: 'May 1, 2026',
     title: 'Architectural Refactoring & UI Overhaul',
-    isLatest: true,
     changes: [
       'Transitioned to a unified **Light Theme** and modernized the typography using the Inter font.',
       'Engineered a **Mobile-First Sidebar** with an interactive slide-over menu and backdrop blur.',

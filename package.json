@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1041.0",
+    "@aws-sdk/util-dynamodb": "^3.996.2",
     "aws-amplify": "^6.16.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
