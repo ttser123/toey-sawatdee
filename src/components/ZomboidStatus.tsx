@@ -1,3 +1,4 @@
+//src\components\ZomboidStatus.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -37,15 +38,28 @@ export default function ZomboidStatus() {
     const [loading, setLoading] = useState<boolean>(true);
 
     const fetchServerData = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            const response = await fetch("/api/zomboid", { cache: "no-store" });
+            const API_URL = process.env.NEXT_PUBLIC_ZOMBOID_API_URL;
+            if (!API_URL) {
+                throw new Error("NEXT_PUBLIC_ZOMBOID_API_URL is not configured");
+            }
+
+            const response = await fetch(API_URL, {
+                cache: "no-store",
+            });
+
+            if (!response.ok) {
+                throw new Error(`AWS Lambda returned status: ${response.status}`);
+            }
+
             const result = await response.json();
 
             if (result.success && result.data) {
                 setData(result.data);
             }
         } catch (err: any) {
+            // Error Handling ระดับ Senior: พังได้แต่อย่าให้ UI ระเบิด
             console.error("[ZomboidStatus] Fetch error:", err.message);
         } finally {
             setLoading(false);
@@ -125,14 +139,14 @@ export default function ZomboidStatus() {
                     {/* Animated status badge */}
                     <span
                         className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-500"
                             }`}
                     >
                         <span
                             className={`inline-block w-2 h-2 rounded-full ${isOnline
-                                    ? "bg-green-500 animate-pulse"
-                                    : "bg-gray-400"
+                                ? "bg-green-500 animate-pulse"
+                                : "bg-gray-400"
                                 }`}
                         />
                         {actualStatus}
