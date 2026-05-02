@@ -11,7 +11,8 @@ const dbClient = new DynamoDBClient({
 });
 
 // Revalidate cached response every 60 seconds
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Default payload returned when the server record is missing or unreachable
 const OFFLINE_DEFAULTS = {
