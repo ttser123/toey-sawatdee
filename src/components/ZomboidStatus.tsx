@@ -139,16 +139,14 @@ export default function ZomboidStatus() {
 
                     {/* Status badge */}
                     <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
-                            isOnline
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
                                 ? "bg-green-100 text-green-700"
                                 : "bg-gray-100 text-gray-500"
-                        }`}
+                            }`}
                     >
                         <span
-                            className={`inline-block w-2 h-2 rounded-full ${
-                                isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                            }`}
+                            className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                                }`}
                         />
                         {actualStatus}
                     </span>
@@ -189,10 +187,10 @@ export default function ZomboidStatus() {
                     label="Last Update"
                     value={
                         data.timestamp
-                            ? new Date(data.timestamp).toLocaleString("th-TH", {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                              })
+                            ? new Date(data.timestamp).toLocaleString("en-US", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                            })
                             : "—"
                     }
                     iconColor="text-purple-600"
