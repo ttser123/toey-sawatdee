@@ -116,8 +116,8 @@ function deriveStatus(data: ZomboidData): "ONLINE" | "OFFLINE" {
 export default function ZomboidStatus() {
     const [data, setData] = useState<ZomboidData>(DEFAULTS);
     const [loading, setLoading] = useState(true);
-    const [mounted, setMounted] = useState(false);
     const [modSearch, setModSearch] = useState("");
+    const [showRaw, setShowRaw] = useState(false);
 
     const fetchServerData = useCallback(async () => {
         try {
@@ -137,15 +137,11 @@ export default function ZomboidStatus() {
     }, []);
 
     useEffect(() => {
-        setMounted(true);
         fetchServerData();
 
         const intervalId = setInterval(fetchServerData, REFRESH_INTERVAL_MS);
         return () => clearInterval(intervalId);
     }, [fetchServerData]);
-
-    // Avoid hydration mismatch — render nothing on server
-    if (!mounted) return null;
 
     const actualStatus = deriveStatus(data);
     const isOnline = actualStatus === "ONLINE";
@@ -181,19 +177,29 @@ export default function ZomboidStatus() {
                         </div>
                     </div>
 
-                    {/* Status badge */}
-                    <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-500"
-                            }`}
-                    >
+                    <div className="flex items-center gap-3">
+                        {/* Raw Payload Button */}
+                        <button
+                            onClick={() => setShowRaw(true)}
+                            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-600 hover:text-gray-900 transition-colors font-mono text-[11px] font-medium tracking-wide"
+                        >
+                            <span className="text-gray-800 font-bold">{`{ }`}</span> View Raw Payload
+                        </button>
+
+                        {/* Status badge */}
                         <span
-                            className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
                                 }`}
-                        />
-                        {actualStatus}
-                    </span>
+                        >
+                            <span
+                                className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                                    }`}
+                            />
+                            {actualStatus}
+                        </span>
+                    </div>
                 </div>
 
                 {loading && (
@@ -416,6 +422,27 @@ export default function ZomboidStatus() {
                             </div>
                         );
                     })()}
+                </div>
+            )}
+
+            {showRaw && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowRaw(false)}>
+                    <div className="bg-white border border-gray-200 rounded-xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
+                            <div className="flex items-center gap-2.5 text-gray-700 font-mono text-sm tracking-wide">
+                                <span className="text-gray-900 font-bold text-lg leading-none mt-[-2px]">{`{ }`}</span>
+                                <span>lambda_response.json</span>
+                            </div>
+                            <button onClick={() => setShowRaw(false)} className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors">
+                                <span className="material-symbols-outlined text-[20px] block">close</span>
+                            </button>
+                        </div>
+                        <div className="p-5 overflow-auto flex-1 custom-scrollbar bg-white">
+                            <pre className="text-gray-800 font-mono text-[13px] leading-relaxed selection:bg-blue-100 selection:text-blue-900">
+                                {JSON.stringify(data, null, 2)}
+                            </pre>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

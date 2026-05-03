@@ -11,9 +11,8 @@ export default function ServerStatusPage() {
             <div className="max-w-5xl mx-auto">
                 <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Server Status</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Admin Log</h1>
                         <p className="text-sm text-gray-500 mt-1">Welcome back, {userEmail}</p>
-
                     </div>
                 </div>
             </div>

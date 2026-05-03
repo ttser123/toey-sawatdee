@@ -10,10 +10,12 @@ import { FaGithub, FaLinkedin, FaEnvelope } from 'react-icons/fa';
 const publicNav = [
   { href: '/', icon: 'bar_chart', label: 'Overview' },
   { href: '/zomboid', icon: 'sports_esports', label: 'Zomboid' },
+  { href: '/status', icon: 'monitor_heart', label: 'Status' },
+  { href: '/release-notes', icon: 'update', label: 'Release Notes' },
 ];
 
 const adminNav = [
-  { href: '/admin/server-status', icon: 'dns', label: 'Server Status' },
+  { href: '/admin/admin-log', icon: 'dns', label: 'Admin Log' },
 ];
 
 export default function Sidebar() {

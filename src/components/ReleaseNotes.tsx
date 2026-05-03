@@ -13,8 +13,20 @@ type ReleaseNote = {
 const releaseNotes: ReleaseNote[] = [
   {
     date: 'May 3, 2026',
-    title: 'Zomboid Serverless Infrastructure & Guardian Agent (v2.0)',
+    title: 'Observability & Professional Dashboard Rebranding',
     isLatest: true,
+    changes: [
+      '**System Status Page:** Launched an enterprise-grade `/status` page with real-time infrastructure health monitoring.',
+      '**Live Health Checks:** Integrated authentic status tracking for **AWS Cognito** (via OIDC config) and **CloudFront** (via local asset verification).',
+      '**Zero-Cost Latency Tracking:** Implemented API latency monitoring using `OPTIONS` preflight requests to avoid unnecessary Lambda invocations and visitor counter increments.',
+      '**Eradicated Layout Shift (CLS):** Refactored Zomboid and Status components to eliminate "Black Hole" hydration flickering by ensuring deterministic SSR states.',
+      '**Technical Rebranding:** Purged marketing buzzwords across the site, replacing them with architectural trade-offs and engineering metrics.',
+      '**Admin Log:** Renamed "Server Status" to "Admin Log" and standardized the internal dashboard interface.'
+    ]
+  },
+  {
+    date: 'May 3, 2026',
+    title: 'Zomboid Serverless Infrastructure & Guardian Agent (v2.0)',
     changes: [
       '**AWS Architecture & Backend:** Corrected the Lambda function runtime mismatch (Node.js -> Python 3.12) and fixed the hardcoded AWS Region bug (ap-southeast-2).',
       '**CORS & Security:** Fixed the double-header trap, properly configured AWS HTTP API CORS settings, and removed a useless API Gateway Authorizer blocking the public API.',
@@ -43,7 +55,7 @@ const releaseNotes: ReleaseNote[] = [
     title: 'Project Zomboid Server Integration',
     changes: [
       'Integrated real-time **Project Zomboid Server Dashboard** into the public view.',
-      'Developed robust backend API polling leveraging the **gamedig** library.',
+      'Developed backend API polling leveraging the **gamedig** library.',
       'Refactored **ZomboidStatus** component for centralized server monitoring.'
     ]
   },
@@ -53,7 +65,7 @@ const releaseNotes: ReleaseNote[] = [
     changes: [
       'Transitioned to a unified **Light Theme** and modernized the typography using the Inter font.',
       'Engineered a **Mobile-First Sidebar** with an interactive slide-over menu and backdrop blur.',
-      'Implemented a secure **Isolated Login Route** with an intelligent Auth Guard and Callback URLs.'
+      'Implemented an **Isolated Login Route** with Auth Guard and Callback URLs.'
     ]
   },
   {
@@ -61,7 +73,7 @@ const releaseNotes: ReleaseNote[] = [
     title: 'Initial Infrastructure Deployment',
     changes: [
       'Configured AWS S3 and CloudFront for global static asset delivery.',
-      'Integrated AWS Cognito User Pools for robust administrator access control.',
+      'Integrated AWS Cognito User Pools for administrator access control.',
       'Established automated CI/CD pipelines via GitHub Actions.'
     ]
   }
@@ -82,7 +94,7 @@ export default function ReleaseNotes() {
   return (
     <>
       {/* Changelog & Release Notes Section */}
-      <div className="mb-6 flex items-center gap-3 px-1 mt-10">
+      <div className="mb-6 flex items-center gap-3 px-1 mt-0">
         <span className="material-symbols-outlined text-gray-400 text-[28px]">update</span>
         <div>
           <h2 className="text-xl font-bold text-gray-900">Release Notes</h2>
