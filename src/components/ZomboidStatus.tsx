@@ -29,7 +29,7 @@ const DEFAULTS: ZomboidData = {
     maxPlayers: 0,
     ping: 0,
     status: "OFFLINE",
-    timestamp: new Date().toISOString(),
+    timestamp: "", // ปล่อยว่างไว้ก่อน
     playersList: [],
 };
 
@@ -37,39 +37,29 @@ export default function ZomboidStatus() {
     const [data, setData] = useState<ZomboidData>(DEFAULTS);
     const [loading, setLoading] = useState<boolean>(true);
 
+    // 🚨 2. ท่าไม้ตาย Senior: สร้าง State เช็คว่าเว็บโหลดเสร็จหรือยัง
+    const [isMounted, setIsMounted] = useState(false);
+
     const fetchServerData = async () => {
-        setLoading(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_ZOMBOID_API_URL;
-            if (!API_URL) {
-                throw new Error("NEXT_PUBLIC_ZOMBOID_API_URL is not configured");
-            }
+            setLoading(true);
+            const API_URL = process.env.NEXT_PUBLIC_ZOMBOID_API_URL || "https://ptwxvou3i55n47d7bczufqqlia0zmuxy.lambda-url.ap-southeast-2.on.aws/";
 
-            const response = await fetch(API_URL, {
-                cache: "no-store",
-            });
-
-            if (!response.ok) {
-                throw new Error(`AWS Lambda returned status: ${response.status}`);
-            }
-
+            const response = await fetch(API_URL);
             const result = await response.json();
 
             if (result.success && result.data) {
                 setData(result.data);
             }
         } catch (err: any) {
-            // Error Handling ระดับ Senior: พังได้แต่อย่าให้ UI ระเบิด
             console.error("[ZomboidStatus] Fetch error:", err.message);
         } finally {
             setLoading(false);
         }
     };
 
-    // Heartbeat validation — if the last update is older than 3 minutes,
-    // treat the server as offline regardless of the stored status.
     const getActualStatus = (): "ONLINE" | "OFFLINE" => {
-        if (data.status === "OFFLINE") return "OFFLINE";
+        if (data.status === "OFFLINE" || !data.timestamp) return "OFFLINE";
 
         const now = Date.now();
         const lastUpdate = new Date(data.timestamp).getTime();
@@ -80,10 +70,17 @@ export default function ZomboidStatus() {
     };
 
     useEffect(() => {
+        // 🚨 3. สั่งให้รู้ว่า Client ฝั่งเบราว์เซอร์พร้อมทำงานแล้ว
+        setIsMounted(true);
         fetchServerData();
         const intervalId = setInterval(fetchServerData, 60_000);
         return () => clearInterval(intervalId);
     }, []);
+
+    // 🚨 4. ถ้ายังโหลดไม่เสร็จ (กำลัง Hydrate) อย่าเพิ่งพ่น HTML ออกไป ให้โชว์หน้าเปล่าๆ ไปก่อน
+    if (!isMounted) {
+        return null; // หรือจะใส่ Skeleton Loading หล่อๆ ก็ได้
+    }
 
     const actualStatus = getActualStatus();
     const isOnline = actualStatus === "ONLINE";
@@ -187,14 +184,10 @@ export default function ZomboidStatus() {
                 <StatCard
                     icon="schedule"
                     label="Last Update"
-                    value={
-                        data.timestamp
-                            ? new Date(data.timestamp).toLocaleString("en-US", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                            })
-                            : "—"
-                    }
+                    value={data.timestamp ? new Date(data.timestamp).toLocaleString("th-TH", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                    }) : "—"}
                     iconColor="text-purple-600"
                     iconBg="bg-purple-50"
                 />
