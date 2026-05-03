@@ -15,7 +15,6 @@ export default function ZomboidPage() {
                     </h1>
                 </div>
             </div>
-
             <ZomboidStatus />
         </main>
     );

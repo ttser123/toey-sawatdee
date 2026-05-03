@@ -31,10 +31,23 @@ export default function Sidebar() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         if (!apiUrl) return;
-        const res = await fetch(`${apiUrl}/visitor`, { method: 'POST' });
-        if (res.ok) {
-          const json = await res.json();
-          setVisitorCount(json.views ?? json.count ?? '—');
+
+        // Backend increments on ALL HTTP methods (GET & POST both +1).
+        // To prevent inflating views: POST once per session, then use cached value.
+        const cachedCount = sessionStorage.getItem('visitor_count');
+
+        if (cachedCount) {
+          // Already counted this session — use cached value, zero API calls
+          setVisitorCount(Number(cachedCount));
+        } else {
+          // First page load this session — POST to increment (+1)
+          const res = await fetch(`${apiUrl}/visitor`, { method: 'POST' });
+          if (res.ok) {
+            const json = await res.json();
+            const count = json.views ?? json.count ?? '—';
+            setVisitorCount(count);
+            sessionStorage.setItem('visitor_count', String(count));
+          }
         }
       } catch (err) {
         console.error('Counter fetch failed:', err);

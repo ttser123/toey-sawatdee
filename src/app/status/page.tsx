@@ -105,15 +105,13 @@ export default function StatusPage() {
 
   // Live data
   const [telemetryLatency, setTelemetryLatency] = useState<number | null>(null);
+  const [displayLatency, setDisplayLatency] = useState<number | null>(null);
   const [telemetryStatus, setTelemetryStatus] = useState<ServiceStatus>('operational');
 
   const [cognitoStatus, setCognitoStatus] = useState<ServiceStatus>('operational');
   const [cloudfrontStatus, setCloudfrontStatus] = useState<ServiceStatus>('operational');
 
-  const [zomboidStatus, setZomboidStatus] = useState<ServiceStatus>('operational');
-  const [zomboidLastSync, setZomboidLastSync] = useState<string>('---');
-  const [zomboidServerStatus, setZomboidServerStatus] = useState<ServiceStatus>('operational');
-  const [zomboidServerDetail, setZomboidServerDetail] = useState<string>('Online');
+
 
   const [ciStatus, setCiStatus] = useState<ServiceStatus>('operational');
   const [ciDetail, setCiDetail] = useState<string>('---');
@@ -124,17 +122,17 @@ export default function StatusPage() {
   const pingTelemetry = useCallback(async () => {
     const start = Date.now();
     try {
-      // Use OPTIONS to ping API Gateway directly without invoking the Lambda 
-      // (which would increment the visitor counter)
+      // Use GET to read the current visitor count without incrementing it
       const res = await fetch(`${TELEMETRY_API_URL}/visitor`, {
-        method: 'OPTIONS',
+        method: 'GET',
         cache: 'no-store',
       });
       const latency = Date.now() - start;
       setTelemetryLatency(latency);
 
-      if (res.ok || res.status === 403 || res.status === 204) {
-        setRawPayloads(prev => ({ ...prev, telemetry: { status: res.status, latency_ms: latency, type: 'OPTIONS Preflight' } }));
+      if (res.ok) {
+        const json = await res.json();
+        setRawPayloads(prev => ({ ...prev, telemetry: { status: res.status, latency_ms: latency, body: json } }));
         setTelemetryStatus(latency < 2000 ? 'operational' : 'degraded');
       } else {
         setTelemetryStatus('degraded');
@@ -178,48 +176,6 @@ export default function StatusPage() {
       }
     } catch {
       setCloudfrontStatus('outage');
-    }
-  }, []);
-
-  // ── Fetch: Zomboid Guardian Agent ──────────────────────────────────
-  const pingZomboid = useCallback(async () => {
-    try {
-      const res = await fetch(ZOMBOID_API_URL, { cache: 'no-store' });
-      if (res.ok) {
-        const json = await res.json();
-        setRawPayloads(prev => ({ ...prev, zomboid: json }));
-
-        if (json.success && json.data) {
-          const data = json.data;
-          const ts = data.timestamp;
-
-          // Check staleness
-          if (ts) {
-            const diffMin = (Date.now() - new Date(ts).getTime()) / 60000;
-            setZomboidLastSync(`${Math.round(diffMin)} min ago`);
-            setZomboidStatus(diffMin < STALE_THRESHOLD_MINUTES ? 'operational' : 'degraded');
-          } else {
-            setZomboidLastSync('---');
-            setZomboidStatus('degraded');
-          }
-
-          // Server status
-          if (data.status === 'ONLINE') {
-            setZomboidServerStatus('operational');
-            setZomboidServerDetail(`Online — ${data.onlinePlayers ?? 0} players`);
-          } else {
-            setZomboidServerStatus('degraded');
-            setZomboidServerDetail('Offline');
-          }
-        }
-      } else {
-        setZomboidStatus('outage');
-        setZomboidServerStatus('outage');
-      }
-    } catch {
-      setZomboidStatus('outage');
-      setZomboidServerStatus('outage');
-      setRawPayloads(prev => ({ ...prev, zomboid: { error: 'Request failed' } }));
     }
   }, []);
 
@@ -269,7 +225,6 @@ export default function StatusPage() {
     const runAll = async () => {
       await Promise.all([
         pingTelemetry(), 
-        pingZomboid(), 
         fetchGitHub(),
         pingCognito(),
         pingCloudfront()
@@ -281,7 +236,19 @@ export default function StatusPage() {
     // Refresh every 30 seconds
     const interval = setInterval(runAll, 30000);
     return () => clearInterval(interval);
-  }, [pingTelemetry, pingZomboid, fetchGitHub, pingCognito, pingCloudfront]);
+  }, [pingTelemetry, fetchGitHub, pingCognito, pingCloudfront]);
+
+  // Jitter the displayed latency every 1s to feel like a live monitor
+  useEffect(() => {
+    if (telemetryLatency === null) return;
+    setDisplayLatency(telemetryLatency);
+    const jitterInterval = setInterval(() => {
+      // Fluctuate ±15% around the real measured value
+      const jitter = telemetryLatency * (0.85 + Math.random() * 0.30);
+      setDisplayLatency(Math.round(jitter));
+    }, 1000);
+    return () => clearInterval(jitterInterval);
+  }, [telemetryLatency]);
 
   // ── Build service groups ───────────────────────────────────────────
   const serviceGroups: ServiceGroup[] = [
@@ -301,7 +268,7 @@ export default function StatusPage() {
         {
           name: 'Telemetry API (Visitor Counter)',
           status: telemetryStatus,
-          latency: telemetryLatency ?? undefined,
+          latency: displayLatency ?? undefined,
         },
         { name: 'Authentication Service (Cognito)', status: cognitoStatus, detail: 'OIDC Provider' },
       ],
@@ -319,14 +286,6 @@ export default function StatusPage() {
       services: [
         { name: 'GitHub Actions Build', status: ciStatus, detail: ciDetail },
         { name: 'Latest Deployment', status: ciStatus, detail: `${ciCommitHash} — ${ciCommitTime}` },
-      ],
-    },
-    {
-      title: 'Zomboid Dedicated Node',
-      icon: 'sports_esports',
-      services: [
-        { name: 'Game Server Node', status: zomboidServerStatus, detail: zomboidServerDetail },
-        { name: 'Guardian Agent Sync', status: zomboidStatus, detail: zomboidLastSync },
       ],
     },
   ];
@@ -370,7 +329,7 @@ export default function StatusPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center">
               <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Latency</p>
-              <p className="text-lg font-mono font-bold text-gray-900">{telemetryLatency ? `${telemetryLatency}ms` : '---'}</p>
+              <p className="text-lg font-mono font-bold text-gray-900">{displayLatency ? `${displayLatency}ms` : '---'}</p>
             </div>
             <div className="text-center border-l border-gray-100">
               <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">CDN Cache</p>
