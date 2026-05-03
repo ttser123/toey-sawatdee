@@ -1,7 +1,8 @@
-//src\components\ZomboidStatus.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
+// ── Types ────────────────────────────────────────────────────────────
 
 interface Player {
     name: string;
@@ -20,7 +21,23 @@ interface ZomboidData {
     playersList?: Player[];
 }
 
-// Fallback data shown while loading or when the API is unreachable
+interface StatCardProps {
+    icon: string;
+    label: string;
+    value: string | number;
+    iconColor: string;
+    iconBg: string;
+}
+
+// ── Constants ────────────────────────────────────────────────────────
+
+const API_URL =
+    process.env.NEXT_PUBLIC_ZOMBOID_API_URL ||
+    "https://ptwxvou3i55n47d7bczufqqlia0zmuxy.lambda-url.ap-southeast-2.on.aws/";
+
+const REFRESH_INTERVAL_MS = 60_000;
+const STALE_THRESHOLD_MINUTES = 3;
+
 const DEFAULTS: ZomboidData = {
     id: "SERVER_1",
     serverName: "Project Zomboid Server",
@@ -29,76 +46,14 @@ const DEFAULTS: ZomboidData = {
     maxPlayers: 0,
     ping: 0,
     status: "OFFLINE",
-    timestamp: "", // ปล่อยว่างไว้ก่อน
+    timestamp: "",
     playersList: [],
 };
 
-export default function ZomboidStatus() {
-    const [data, setData] = useState<ZomboidData>(DEFAULTS);
-    const [loading, setLoading] = useState<boolean>(true);
+// ── Sub-components ───────────────────────────────────────────────────
 
-    // 🚨 2. ท่าไม้ตาย Senior: สร้าง State เช็คว่าเว็บโหลดเสร็จหรือยัง
-    const [isMounted, setIsMounted] = useState(false);
-
-    const fetchServerData = async () => {
-        try {
-            setLoading(true);
-            const API_URL = process.env.NEXT_PUBLIC_ZOMBOID_API_URL || "https://ptwxvou3i55n47d7bczufqqlia0zmuxy.lambda-url.ap-southeast-2.on.aws/";
-
-            const response = await fetch(API_URL);
-            const result = await response.json();
-
-            if (result.success && result.data) {
-                setData(result.data);
-            }
-        } catch (err: any) {
-            console.error("[ZomboidStatus] Fetch error:", err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getActualStatus = (): "ONLINE" | "OFFLINE" => {
-        if (data.status === "OFFLINE" || !data.timestamp) return "OFFLINE";
-
-        const now = Date.now();
-        const lastUpdate = new Date(data.timestamp).getTime();
-        const diffMinutes = (now - lastUpdate) / (1000 * 60);
-
-        if (diffMinutes > 3) return "OFFLINE";
-        return "ONLINE";
-    };
-
-    useEffect(() => {
-        // 🚨 3. สั่งให้รู้ว่า Client ฝั่งเบราว์เซอร์พร้อมทำงานแล้ว
-        setIsMounted(true);
-        fetchServerData();
-        const intervalId = setInterval(fetchServerData, 60_000);
-        return () => clearInterval(intervalId);
-    }, []);
-
-    // 🚨 4. ถ้ายังโหลดไม่เสร็จ (กำลัง Hydrate) อย่าเพิ่งพ่น HTML ออกไป ให้โชว์หน้าเปล่าๆ ไปก่อน
-    if (!isMounted) {
-        return null; // หรือจะใส่ Skeleton Loading หล่อๆ ก็ได้
-    }
-
-    const actualStatus = getActualStatus();
-    const isOnline = actualStatus === "ONLINE";
-
-    // Stat card helper
-    const StatCard = ({
-        icon,
-        label,
-        value,
-        iconColor,
-        iconBg,
-    }: {
-        icon: string;
-        label: string;
-        value: string | number;
-        iconColor: string;
-        iconBg: string;
-    }) => (
+function StatCard({ icon, label, value, iconColor, iconBg }: StatCardProps) {
+    return (
         <div className="bg-gray-50 rounded-lg p-4 flex items-center gap-4 border border-gray-100">
             <span
                 className={`material-symbols-outlined text-[22px] ${iconColor} ${iconBg} p-2 rounded-lg`}
@@ -113,10 +68,59 @@ export default function ZomboidStatus() {
             </div>
         </div>
     );
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────
+
+/** Returns "OFFLINE" if the last update is stale (> threshold) or explicitly offline. */
+function deriveStatus(data: ZomboidData): "ONLINE" | "OFFLINE" {
+    if (data.status === "OFFLINE" || !data.timestamp) return "OFFLINE";
+
+    const diffMinutes = (Date.now() - new Date(data.timestamp).getTime()) / (1000 * 60);
+    return diffMinutes > STALE_THRESHOLD_MINUTES ? "OFFLINE" : "ONLINE";
+}
+
+// ── Main Component ───────────────────────────────────────────────────
+
+export default function ZomboidStatus() {
+    const [data, setData] = useState<ZomboidData>(DEFAULTS);
+    const [loading, setLoading] = useState(true);
+    const [mounted, setMounted] = useState(false);
+
+    const fetchServerData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await fetch(API_URL);
+            const result = await response.json();
+
+            if (result.success && result.data) {
+                setData(result.data);
+            }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error("[ZomboidStatus] Fetch error:", message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        setMounted(true);
+        fetchServerData();
+
+        const intervalId = setInterval(fetchServerData, REFRESH_INTERVAL_MS);
+        return () => clearInterval(intervalId);
+    }, [fetchServerData]);
+
+    // Avoid hydration mismatch — render nothing on server
+    if (!mounted) return null;
+
+    const actualStatus = deriveStatus(data);
+    const isOnline = actualStatus === "ONLINE";
 
     return (
         <div className="space-y-6">
-            {/* Server Header Card */}
+            {/* ── Server Header ─────────────────────────────────── */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
                 <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-3">
@@ -133,24 +137,23 @@ export default function ZomboidStatus() {
                         </div>
                     </div>
 
-                    {/* Animated status badge */}
+                    {/* Status badge */}
                     <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-500"
-                            }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${
+                            isOnline
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                        }`}
                     >
                         <span
-                            className={`inline-block w-2 h-2 rounded-full ${isOnline
-                                ? "bg-green-500 animate-pulse"
-                                : "bg-gray-400"
-                                }`}
+                            className={`inline-block w-2 h-2 rounded-full ${
+                                isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                            }`}
                         />
                         {actualStatus}
                     </span>
                 </div>
 
-                {/* Loading shimmer overlay */}
                 {loading && (
                     <p className="text-xs text-gray-400 mt-3 animate-pulse">
                         Refreshing server data…
@@ -158,7 +161,7 @@ export default function ZomboidStatus() {
                 )}
             </div>
 
-            {/* Stats Grid — always visible */}
+            {/* ── Stats Grid ────────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard
                     icon="map"
@@ -184,16 +187,20 @@ export default function ZomboidStatus() {
                 <StatCard
                     icon="schedule"
                     label="Last Update"
-                    value={data.timestamp ? new Date(data.timestamp).toLocaleString("th-TH", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                    }) : "—"}
+                    value={
+                        data.timestamp
+                            ? new Date(data.timestamp).toLocaleString("th-TH", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                              })
+                            : "—"
+                    }
                     iconColor="text-purple-600"
                     iconBg="bg-purple-50"
                 />
             </div>
 
-            {/* Online Players List */}
+            {/* ── Online Players ─────────────────────────────────── */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-5">
                     <span className="material-symbols-outlined text-teal-600 bg-teal-50 p-2.5 rounded-lg">
@@ -206,9 +213,9 @@ export default function ZomboidStatus() {
 
                 {data.playersList && data.playersList.length > 0 ? (
                     <ul className="space-y-2">
-                        {data.playersList.map((player, index) => (
+                        {data.playersList.map((player) => (
                             <li
-                                key={index}
+                                key={player.name}
                                 className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100"
                             >
                                 <div className="flex items-center gap-3">
@@ -239,17 +246,16 @@ export default function ZomboidStatus() {
                 )}
             </div>
 
-            {/* Offline hint banner */}
+            {/* ── Offline Banner ──────────────────────────────────── */}
             {!isOnline && (
                 <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
                     <span className="material-symbols-outlined text-amber-500 text-[20px] mt-0.5 shrink-0">
                         info
                     </span>
                     <p className="leading-relaxed">
-                        The server is currently offline or undergoing
-                        maintenance. All statistics above will update
-                        automatically once the server comes back online. Data
-                        refreshes every 60 seconds.
+                        The server is currently offline or undergoing maintenance.
+                        All statistics above will update automatically once the
+                        server comes back online. Data refreshes every 60 seconds.
                     </p>
                 </div>
             )}

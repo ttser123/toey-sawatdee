@@ -13,9 +13,6 @@ export default function ZomboidPage() {
                     <h1 className="text-xl font-bold text-gray-900">
                         Zomboid Server Monitor
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Real-time status and player activity for the Project Zomboid dedicated server.
-                    </p>
                 </div>
             </div>
 
