@@ -118,25 +118,26 @@ export default function StatusPage() {
   const [ciCommitHash, setCiCommitHash] = useState<string>('---');
   const [ciCommitTime, setCiCommitTime] = useState<string>('---');
 
-  // ── Fetch: Telemetry API (Live Ping) ───────────────────────────────
+  // ── Fetch: AWS Latency (via Cognito OIDC — zero side effects) ──────
+  // NEVER ping /visitor here! Even GET may increment the counter
+  // depending on Lambda deployment state. Cognito's public OIDC endpoint
+  // is the safest, free, idempotent way to measure AWS round-trip latency.
   const pingTelemetry = useCallback(async () => {
     const start = Date.now();
     try {
-      // Use GET to read the current visitor count without incrementing it
-      const res = await fetch(`${TELEMETRY_API_URL}/visitor`, {
-        method: 'GET',
-        cache: 'no-store',
-      });
+      const region = 'ap-southeast-2';
+      const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'ap-southeast-2_lzY5nRppB';
+      const url = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}/.well-known/openid-configuration`;
+
+      const res = await fetch(url, { method: 'GET', cache: 'no-store' });
       const latency = Date.now() - start;
       setTelemetryLatency(latency);
 
       if (res.ok) {
-        const json = await res.json();
-        setRawPayloads(prev => ({ ...prev, telemetry: { status: res.status, latency_ms: latency, body: json } }));
+        setRawPayloads(prev => ({ ...prev, telemetry: { status: 'Operational', latency_ms: latency, source: 'Cognito OIDC Ping' } }));
         setTelemetryStatus(latency < 2000 ? 'operational' : 'degraded');
       } else {
         setTelemetryStatus('degraded');
-        setRawPayloads(prev => ({ ...prev, telemetry: { status: res.status, latency_ms: latency, error: res.statusText } }));
       }
     } catch {
       setTelemetryLatency(null);
