@@ -12,9 +12,24 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 3, 2026',
+    title: 'Zomboid Serverless Infrastructure & Guardian Agent (v2.0)',
+    isLatest: true,
+    changes: [
+      '**AWS Architecture & Backend:** Corrected the Lambda function runtime mismatch (Node.js -> Python 3.12) and fixed the hardcoded AWS Region bug (ap-southeast-2).',
+      '**CORS & Security:** Fixed the double-header trap, properly configured AWS HTTP API CORS settings, and removed a useless API Gateway Authorizer blocking the public API.',
+      '**DynamoDB Decimal Serialization:** Implemented a custom DecimalEncoder in Python to prevent JSON parsing crashes.',
+      '**The Guardian Agent:** Completely rewrote the game server polling script with stateful memory tracking (Peak Players, Total Ping, Uptime).',
+      '**Graceful Shutdown:** Added SIGINT and SIGTERM signal listeners to push a final OFFLINE payload to AWS before dying, preventing "Ghost Online" statuses.',
+      '**Direct File System Parsing:** Bypassed GameDig limitations by directly reading the Zomboid servertest.ini configuration file to extract and push the active ModsList.',
+      '**Frontend React Hydration Fix:** Implemented an isMounted state to prevent server/client rendering mismatches caused by dynamic timestamps.',
+      '**Offline Flex Dashboard:** Revamped the UI logic to dynamically shift and show an AWS Serverless Architecture Diagram alongside Last Session Historical Stats during downtime.',
+      '**Eradicated Ghost Data Bugs:** Forced conditional rendering to cleanly display 0/0 and 0 ms when the server is down.'
+    ]
+  },
+  {
     date: 'May 2, 2026',
     title: 'Zomboid Dashboard Redesign & Stability',
-    isLatest: true,
     changes: [
       'Redesigned **ZomboidStatus** component to always display all stat fields (Map, Players, Ping, Last Update) even when the server is offline — showing zero / placeholder values.',
       'Refactored **Zomboid API route** with graceful offline defaults so the page never renders an error state.',

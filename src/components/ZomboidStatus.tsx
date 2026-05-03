@@ -117,6 +117,7 @@ export default function ZomboidStatus() {
     const [data, setData] = useState<ZomboidData>(DEFAULTS);
     const [loading, setLoading] = useState(true);
     const [mounted, setMounted] = useState(false);
+    const [modSearch, setModSearch] = useState("");
 
     const fetchServerData = useCallback(async () => {
         try {
@@ -151,6 +152,18 @@ export default function ZomboidStatus() {
 
     return (
         <div className="space-y-6">
+            {/* ── Offline Banner ──────────────────────────────────── */}
+            {!isOnline && (
+                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                    <span className="material-symbols-outlined text-amber-500 text-[22px] shrink-0">
+                        notification_important
+                    </span>
+                    <p className="leading-relaxed font-medium">
+                        Server is currently offline. Statistics will update automatically (every 60s) once online.
+                    </p>
+                </div>
+            )}
+
             {/* ── Server Header ─────────────────────────────────── */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between mb-1">
@@ -349,30 +362,60 @@ export default function ZomboidStatus() {
                         )}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto pr-2">
-                        {data.modsList.map((modName, index) => (
-                            <span
-                                key={index}
-                                className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-200 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-colors"
+                    {/* Search */}
+                    <div className="relative mb-4">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">
+                            search
+                        </span>
+                        <input
+                            type="text"
+                            placeholder="Search mods..."
+                            value={modSearch}
+                            onChange={(e) => setModSearch(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 transition-colors"
+                        />
+                        {modSearch && (
+                            <button
+                                onClick={() => setModSearch("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
-                                {modName}
-                            </span>
-                        ))}
+                                <span className="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                        )}
                     </div>
-                </div>
-            )}
 
-            {/* ── Offline Banner ──────────────────────────────────── */}
-            {!isOnline && (
-                <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                    <span className="material-symbols-outlined text-amber-500 text-[20px] mt-0.5 shrink-0">
-                        info
-                    </span>
-                    <p className="leading-relaxed">
-                        The server is currently offline or undergoing maintenance.
-                        All statistics above will update automatically once the
-                        server comes back online. Data refreshes every 60 seconds.
-                    </p>
+                    {(() => {
+                        const filtered = [...data.modsList]
+                            .filter((m) => m.toLowerCase().includes(modSearch.toLowerCase()))
+                            .sort((a, b) => a.localeCompare(b));
+
+                        return filtered.length > 0 ? (
+                            <ul className="space-y-1.5 max-h-72 overflow-y-auto pr-2">
+                                {filtered.map((modName, index) => (
+                                    <li
+                                        key={modName}
+                                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-orange-50 transition-colors group"
+                                    >
+                                        <span className="text-xs text-gray-300 font-mono w-6 text-right shrink-0 group-hover:text-orange-400">
+                                            {index + 1}
+                                        </span>
+                                        <span className="text-sm text-gray-700 font-medium group-hover:text-orange-700">
+                                            {modName}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="text-center py-6">
+                                <span className="material-symbols-outlined text-gray-300 text-[32px] mb-1">
+                                    search_off
+                                </span>
+                                <p className="text-sm text-gray-400">
+                                    No mods matching &ldquo;{modSearch}&rdquo;
+                                </p>
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
         </div>
