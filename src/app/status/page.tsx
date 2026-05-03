@@ -209,11 +209,12 @@ export default function StatusPage() {
           }
         }
       } else {
-        // GitHub API rate limit or repo is private
+        // GitHub API rate limit (60 req/hr for unauthenticated)
         setCiStatus('operational');
-        setCiDetail('N/A (Private Repo)');
+        setCiDetail('Rate Limited');
         setCiCommitHash('---');
         setCiCommitTime('---');
+        setRawPayloads(prev => ({ ...prev, github: { error: `HTTP ${res.status} — GitHub rate limit exceeded (60 req/hr unauthenticated)` } }));
       }
     } catch {
       setCiStatus('degraded');
@@ -222,11 +223,16 @@ export default function StatusPage() {
   }, []);
 
   // ── Init ───────────────────────────────────────────────────────────
+  // GitHub API is fetched ONCE on mount (not in the 30s loop) to preserve
+  // the 60 req/hr rate limit. CI/CD data rarely changes mid-session.
+  useEffect(() => {
+    fetchGitHub();
+  }, [fetchGitHub]);
+
   useEffect(() => {
     const runAll = async () => {
       await Promise.all([
         pingTelemetry(), 
-        fetchGitHub(),
         pingCognito(),
         pingCloudfront()
       ]);
@@ -237,7 +243,7 @@ export default function StatusPage() {
     // Refresh every 30 seconds
     const interval = setInterval(runAll, 30000);
     return () => clearInterval(interval);
-  }, [pingTelemetry, fetchGitHub, pingCognito, pingCloudfront]);
+  }, [pingTelemetry, pingCognito, pingCloudfront]);
 
   // Jitter the displayed latency every 1s to feel like a live monitor
   useEffect(() => {
