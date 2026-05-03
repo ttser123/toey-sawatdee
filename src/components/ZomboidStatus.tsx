@@ -231,76 +231,49 @@ export default function ZomboidStatus() {
 
             {/* ── Dynamic Content: Online vs Offline View ───────── */}
             {isOnline ? (
-                /* 🟢 ONLINE: Active Players + Mods */
-                <>
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3 mb-5">
-                            <span className="material-symbols-outlined text-teal-600 bg-teal-50 p-2.5 rounded-lg">
-                                person
-                            </span>
-                            <h3 className="text-lg font-bold text-gray-900">
-                                Online Players
-                            </h3>
-                        </div>
-
-                        {data.playersList && data.playersList.length > 0 ? (
-                            <ul className="space-y-2">
-                                {data.playersList.map((player) => (
-                                    <li
-                                        key={player.name}
-                                        className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className="material-symbols-outlined text-gray-400 text-[18px]">
-                                                person
-                                            </span>
-                                            <span className="text-sm font-medium text-gray-800">
-                                                {player.name}
-                                            </span>
-                                        </div>
-                                        <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">
-                                            {player.onlineTimeMinutes} min
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <div className="text-center py-8">
-                                <span className="material-symbols-outlined text-gray-300 text-[40px] mb-2">
-                                    group_off
-                                </span>
-                                <p className="text-sm text-gray-400">
-                                    No players are currently connected.
-                                </p>
-                            </div>
-                        )}
+                /* 🟢 ONLINE: Active Players */
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-5">
+                        <span className="material-symbols-outlined text-teal-600 bg-teal-50 p-2.5 rounded-lg">
+                            person
+                        </span>
+                        <h3 className="text-lg font-bold text-gray-900">
+                            Online Players
+                        </h3>
                     </div>
 
-                    {/* ── Server Mods ─────────────────────────────────────── */}
-                    {data.modsList && data.modsList.length > 0 && (
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
-                            <div className="flex items-center gap-3 mb-5">
-                                <span className="material-symbols-outlined text-orange-600 bg-orange-50 p-2.5 rounded-lg">
-                                    extension
-                                </span>
-                                <h3 className="text-lg font-bold text-gray-900">
-                                    Active Mods ({data.modsList.length})
-                                </h3>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto pr-2">
-                                {data.modsList.map((modName, index) => (
-                                    <span
-                                        key={index}
-                                        className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-200 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-colors"
-                                    >
-                                        {modName}
+                    {data.playersList && data.playersList.length > 0 ? (
+                        <ul className="space-y-2">
+                            {data.playersList.map((player) => (
+                                <li
+                                    key={player.name}
+                                    className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="material-symbols-outlined text-gray-400 text-[18px]">
+                                            person
+                                        </span>
+                                        <span className="text-sm font-medium text-gray-800">
+                                            {player.name}
+                                        </span>
+                                    </div>
+                                    <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">
+                                        {player.onlineTimeMinutes} min
                                     </span>
-                                ))}
-                            </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="text-center py-8">
+                            <span className="material-symbols-outlined text-gray-300 text-[40px] mb-2">
+                                group_off
+                            </span>
+                            <p className="text-sm text-gray-400">
+                                No players are currently connected.
+                            </p>
                         </div>
                     )}
-                </>
+                </div>
             ) : (
                 /* 🔴 OFFLINE: Last Session Stats */
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
@@ -350,6 +323,42 @@ export default function ZomboidStatus() {
                             </p>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* ── Active Mods (always visible) ────────────────────── */}
+            {data.modsList && data.modsList.length > 0 && (
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-orange-600 bg-orange-50 p-2.5 rounded-lg">
+                                extension
+                            </span>
+                            <h3 className="text-lg font-bold text-gray-900">
+                                Active Mods ({data.modsList.length})
+                            </h3>
+                        </div>
+                        {!isOnline && data.timestamp && (
+                            <span className="text-xs text-gray-400 font-medium">
+                                Last updated:{" "}
+                                {new Date(data.timestamp).toLocaleString("en-US", {
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                })}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto pr-2">
+                        {data.modsList.map((modName, index) => (
+                            <span
+                                key={index}
+                                className="px-3 py-1.5 bg-gray-50 text-gray-700 text-sm font-medium rounded-md border border-gray-200 hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-colors"
+                            >
+                                {modName}
+                            </span>
+                        ))}
+                    </div>
                 </div>
             )}
 
