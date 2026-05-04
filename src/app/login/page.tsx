@@ -18,7 +18,7 @@ function LoginForm() {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const callbackUrl = searchParams.get('callbackUrl') || '/admin/server-status';
+    const callbackUrl = searchParams.get('callbackUrl') || '/admin/admin-log';
 
     // If already logged in, redirect directly to the callback or dashboard
     useEffect(() => {
@@ -30,7 +30,7 @@ function LoginForm() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        console.log("🔥 CHECK ENV:", process.env.NEXT_PUBLIC_USER_POOL_ID);
+
         setErrorMsg('');
 
         try {

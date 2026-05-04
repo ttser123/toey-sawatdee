@@ -1,20 +1,24 @@
 import React from 'react';
 
+// ── Types ────────────────────────────────────────────────────────────
+
 type ReleaseNote = {
+  /** ISO-style or human-readable date string */
   date: string;
+  /** ISO date for <time dateTime="..."> (YYYY-MM-DD) */
+  isoDate: string;
   title: string;
-  isLatest?: boolean;
   changes: string[];
 };
 
 // ==========================================
-// 🚀 ADD NEW UPDATES HERE
+// 🚀 ADD NEW UPDATES HERE (index 0 = latest)
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
     date: 'May 3, 2026',
+    isoDate: '2026-05-03',
     title: 'Observability & Professional Dashboard Rebranding',
-    isLatest: true,
     changes: [
       '**System Status Page:** Launched an enterprise-grade `/status` page with real-time infrastructure health monitoring.',
       '**Live Health Checks:** Integrated authentic status tracking for **AWS Cognito** (via OIDC config) and **CloudFront** (via local asset verification).',
@@ -26,6 +30,7 @@ const releaseNotes: ReleaseNote[] = [
   },
   {
     date: 'May 3, 2026',
+    isoDate: '2026-05-03',
     title: 'Zomboid Serverless Infrastructure & Guardian Agent (v2.0)',
     changes: [
       '**AWS Architecture & Backend:** Corrected the Lambda function runtime mismatch (Node.js -> Python 3.12) and fixed the hardcoded AWS Region bug (ap-southeast-2).',
@@ -41,6 +46,7 @@ const releaseNotes: ReleaseNote[] = [
   },
   {
     date: 'May 2, 2026',
+    isoDate: '2026-05-02',
     title: 'Zomboid Dashboard Redesign & Stability',
     changes: [
       'Redesigned **ZomboidStatus** component to always display all stat fields (Map, Players, Ping, Last Update) even when the server is offline — showing zero / placeholder values.',
@@ -52,6 +58,7 @@ const releaseNotes: ReleaseNote[] = [
   },
   {
     date: 'May 2, 2026',
+    isoDate: '2026-05-02',
     title: 'Project Zomboid Server Integration',
     changes: [
       'Integrated real-time **Project Zomboid Server Dashboard** into the public view.',
@@ -61,6 +68,7 @@ const releaseNotes: ReleaseNote[] = [
   },
   {
     date: 'May 1, 2026',
+    isoDate: '2026-05-01',
     title: 'Architectural Refactoring & UI Overhaul',
     changes: [
       'Transitioned to a unified **Light Theme** and modernized the typography using the Inter font.',
@@ -70,6 +78,7 @@ const releaseNotes: ReleaseNote[] = [
   },
   {
     date: 'Apr 28, 2026',
+    isoDate: '2026-04-28',
     title: 'Initial Infrastructure Deployment',
     changes: [
       'Configured AWS S3 and CloudFront for global static asset delivery.',
@@ -79,16 +88,25 @@ const releaseNotes: ReleaseNote[] = [
   }
 ];
 
-// Helper to render basic markdown-like bold text (e.g. **bold text**)
+// ── Fix #4: Content-based stable keys instead of array index ─────────
+
+/**
+ * Renders basic markdown-like bold text (**bold text**).
+ * Uses content-derived keys instead of array index to prevent
+ * React reconciliation bugs on list mutations.
+ */
 const renderText = (text: string) => {
   const parts = text.split(/(\*\*.*?\*\*)/);
-  return parts.map((part, i) => {
+  return parts.map((part) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
+      return <strong key={`b-${part}`} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
     }
-    return <span key={i}>{part}</span>;
+    // Use the content itself as key — guaranteed unique within one split
+    return <React.Fragment key={`t-${part}`}>{part}</React.Fragment>;
   });
 };
+
+// ── Component ────────────────────────────────────────────────────────
 
 export default function ReleaseNotes() {
   return (
@@ -104,49 +122,81 @@ export default function ReleaseNotes() {
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
         <div className="space-y-8">
-          {releaseNotes.map((note, index) => (
-            <div key={index} className="relative pl-8 md:pl-0">
-              
-              {/* Timeline Line (Hidden on the very last item) */}
-              {index !== releaseNotes.length - 1 && (
-                <div className="absolute left-[11px] md:left-[116px] top-2 bottom-[-32px] w-px bg-gray-200"></div>
-              )}
+          {releaseNotes.map((note, index) => {
+            {/* Fix #2: Derive isLatest from position — first item is always latest */}
+            const isLatest = index === 0;
+            const isLast = index === releaseNotes.length - 1;
+            {/* Stable key from date + title (unique per release) */}
+            const noteKey = `${note.isoDate}-${note.title}`;
 
-              {/* Timeline Dot */}
-              <div 
-                className={`absolute left-[11.5px] md:left-[116.5px] top-1.5 w-2.5 h-2.5 rounded-full ring-4 ring-white -translate-x-1/2 ${note.isLatest ? 'bg-blue-600' : 'bg-gray-300'}`}
-              ></div>
+            return (
+              // Fix #3: Semantic <article> for each release entry
+              <article key={noteKey} className="relative">
 
-              <div className="flex flex-col md:flex-row gap-2 md:gap-8">
-                
-                {/* Date Column */}
-                <div className="md:w-[100px] shrink-0 pt-0.5 md:text-right">
-                  <span className={`text-sm font-bold ${note.isLatest ? 'text-blue-600' : 'text-gray-500'}`}>
-                    {note.date}
-                  </span>
-                </div>
-                
-                {/* Content Column */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="text-base font-semibold text-gray-900">{note.title}</h4>
-                    {note.isLatest && (
-                      <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full">
-                        Latest
-                      </span>
+                {/* ── Fix #1: CSS Grid layout instead of magic-number positioning ── */}
+                <div className="grid grid-cols-[auto_1fr] md:grid-cols-[100px_16px_1fr] gap-x-3 md:gap-x-4">
+
+                  {/* ── Date Column ── */}
+                  <div className="hidden md:flex items-start justify-end pt-0.5">
+                    {/* Fix #3: Semantic <time> element with dateTime attribute */}
+                    <time
+                      dateTime={note.isoDate}
+                      className={`text-sm font-bold ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                    >
+                      {note.date}
+                    </time>
+                  </div>
+
+                  {/* ── Timeline Track (dot + line) — desktop only ── */}
+                  <div className="hidden md:flex flex-col items-center">
+                    {/* Dot */}
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white shrink-0 mt-1.5 ${isLatest ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    />
+                    {/* Line */}
+                    {!isLast && (
+                      <div className="w-px flex-1 bg-gray-200 mt-1" />
                     )}
                   </div>
-                  
-                  <div className="space-y-2 text-sm text-gray-600">
-                    {note.changes.map((change, i) => (
-                      <p key={i} className="leading-relaxed">• {renderText(change)}</p>
-                    ))}
+
+                  {/* ── Mobile: date + dot inline row ── */}
+                  <div className="flex md:hidden items-center gap-2 col-span-2 mb-1">
+                    <div
+                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white shrink-0 ${isLatest ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    />
+                    <time
+                      dateTime={note.isoDate}
+                      className={`text-sm font-bold ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                    >
+                      {note.date}
+                    </time>
                   </div>
+
+                  {/* ── Content Column ── */}
+                  <div className="col-span-2 md:col-span-1 pl-5 md:pl-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-base font-semibold text-gray-900">{note.title}</h3>
+                      {isLatest && (
+                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                          Latest
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Fix #3: Semantic <ul>/<li> instead of <p> with bullet character */}
+                    <ul className="space-y-2 text-sm text-gray-600 list-disc list-outside pl-4 marker:text-gray-300">
+                      {note.changes.map((change) => (
+                        <li key={`${noteKey}-${change.slice(0, 40)}`} className="leading-relaxed pl-1">
+                          {renderText(change)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
                 </div>
-                
-              </div>
-            </div>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </>

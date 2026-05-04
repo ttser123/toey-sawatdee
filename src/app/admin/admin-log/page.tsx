@@ -1,4 +1,4 @@
-// src/app/admin/server-status/page.tsx
+// src/app/admin/admin-log/page.tsx
 'use client';
 
 import { useAuth } from '@/components/AuthProvider';
