@@ -1,4 +1,4 @@
-// src/app/zomboid/page.tsx — Project Zomboid Server Status (public)
+// src/app/games-server/zomboid/page.tsx — Project Zomboid Server Status (public)
 import ZomboidStatus from '@/components/ZomboidStatus';
 
 export default function ZomboidPage() {
