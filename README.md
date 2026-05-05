@@ -1,9 +1,9 @@
-# 📐 toey-sawatdee — Cloud Infrastructure & Observability Dashboard
+# toey-sawatdee — Cloud Infrastructure & Observability Dashboard
 
 > A production-grade, serverless portfolio engineered as a **real-time system status dashboard** — not a landing page.  
 > Built on AWS (S3, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, and a custom **Blueprint design system**.
 
-### 🔗 **[Live Demo → toey-sawatdee.com](https://toey-sawatdee.com)**
+### [Live Demo → toey-sawatdee.me](https://toey-sawatdee.me)
 
 ---
 
@@ -68,13 +68,13 @@
 
 ## Architectural Trade-offs & Security Decisions
 
-### 🔐 OIDC Federation over Static AWS Keys
+### OIDC Federation over Static AWS Keys
 
 The CI/CD pipeline authenticates to AWS via **GitHub OIDC → STS AssumeRole**, issuing short-lived tokens per deployment run. No `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` are stored as long-lived secrets for deployment. This eliminates the risk of credential leakage from repository forks or compromised Actions runners.
 
 > _Build-time env vars (e.g. `NEXT_PUBLIC_API_URL`) are still injected via GitHub Secrets but are baked into static HTML at build time — they contain no privileged credentials._
 
-### 🛡️ Serverless Routing: GET vs POST Isolation
+### Serverless Routing: GET vs POST Isolation
 
 The visitor counter Lambda **increments on every HTTP method** by default (a common serverless anti-pattern). To prevent F5-spam inflation:
 
@@ -84,13 +84,13 @@ The visitor counter Lambda **increments on every HTTP method** by default (a com
 
 This keeps DynamoDB read/write costs under **$1/month** even under continuous polling.
 
-### 🧹 Data Sanitization & Backend Boundaries
+### Data Sanitization & Backend Boundaries
 
 - The Zomboid Lambda returns only a curated `{ success, data }` payload — internal AWS metadata (`RequestId`, `FunctionArn`, execution context) is stripped before response
 - The Guardian Agent on the game server pushes **pre-aggregated** metrics (peak players, avg ping, uptime) — raw server logs and filesystem paths never leave the host
 - The `DecimalEncoder` in Python Lambda prevents DynamoDB's `Decimal` type from crashing JSON serialization — a silent data corruption bug that only surfaces under load
 
-### ⚡ CloudFront Functions over Lambda@Edge
+### CloudFront Functions over Lambda@Edge
 
 URL path rewriting for Next.js static export uses **CloudFront Functions** (sub-millisecond, $0.10/million) instead of Lambda@Edge ($0.60/million + cold start). The trade-off: no network/filesystem access in the rewrite logic — acceptable since we only need path manipulation.
 
