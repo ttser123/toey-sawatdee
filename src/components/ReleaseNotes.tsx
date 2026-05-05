@@ -16,6 +16,19 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 5, 2026',
+    isoDate: '2026-05-05',
+    title: 'Blueprint Design System & Technical Aesthetics Overhaul',
+    changes: [
+      '**The Blueprint Grid:** Migrated from solid backgrounds to a 24px precision graph-paper grid across all application routes.',
+      '**Tracing Paper Cards:** Implemented semi-translucent (`bg-white/80`) cards with backdrop-blur, allowing background grid lines to bleed through for a premium layered feel.',
+      '**The Ink Palette:** Replaced generic colors with a professional "Ink & Paper" palette (Slate-800/300) and Indigo-600 (Printer Blue) accents.',
+      '**Monospace Dominance:** Enforced `font-mono` across all metrics, latency values, and technical IDs to emphasize data precision.',
+      '**Sharp Edge Architecture:** Purged all shadows and consumer-grade rounded corners, adopting a ruler-sharp `rounded-sm` design system.',
+      '**Micro-Interactions:** Engineered a "Radar Pulse" (`animate-radar-ping`) for live status indicators, providing visual feedback of heartbeat synchronization.'
+    ]
+  },
+  {
     date: 'May 3, 2026',
     isoDate: '2026-05-03',
     title: 'Observability & Professional Dashboard Rebranding',
@@ -99,7 +112,7 @@ const renderText = (text: string) => {
   const parts = text.split(/(\*\*.*?\*\*)/);
   return parts.map((part) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={`b-${part}`} className="font-semibold text-gray-900">{part.slice(2, -2)}</strong>;
+      return <strong key={`b-${part}`} className="font-semibold text-slate-800">{part.slice(2, -2)}</strong>;
     }
     // Use the content itself as key — guaranteed unique within one split
     return <React.Fragment key={`t-${part}`}>{part}</React.Fragment>;
@@ -113,14 +126,14 @@ export default function ReleaseNotes() {
     <>
       {/* Changelog & Release Notes Section */}
       <div className="mb-6 flex items-center gap-3 px-1 mt-0">
-        <span className="material-symbols-outlined text-gray-400 text-[28px]">update</span>
+        <span className="material-symbols-outlined text-slate-400 text-[28px]">update</span>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Release Notes</h2>
-          <p className="text-sm text-gray-500 mt-1">Track recent updates, feature rollouts, and infrastructure changes.</p>
+          <h2 className="text-xl font-bold text-slate-800">Release Notes</h2>
+          <p className="text-sm text-slate-500 mt-1">Track recent updates, feature rollouts, and infrastructure changes.</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
+      <div className="card-blueprint p-6 md:p-8">
         <div className="space-y-8">
           {releaseNotes.map((note, index) => {
             {/* Fix #2: Derive isLatest from position — first item is always latest */}
@@ -141,7 +154,7 @@ export default function ReleaseNotes() {
                     {/* Fix #3: Semantic <time> element with dateTime attribute */}
                     <time
                       dateTime={note.isoDate}
-                      className={`text-sm font-bold ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                      className={`text-sm font-bold font-mono ${isLatest ? 'text-indigo-600' : 'text-slate-500'}`}
                     >
                       {note.date}
                     </time>
@@ -151,22 +164,22 @@ export default function ReleaseNotes() {
                   <div className="hidden md:flex flex-col items-center">
                     {/* Dot */}
                     <div
-                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white shrink-0 mt-1.5 ${isLatest ? 'bg-blue-600' : 'bg-gray-300'}`}
+                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white/80 shrink-0 mt-1.5 ${isLatest ? 'bg-indigo-600' : 'bg-slate-300'}`}
                     />
                     {/* Line */}
                     {!isLast && (
-                      <div className="w-px flex-1 bg-gray-200 mt-1" />
+                      <div className="w-px flex-1 bg-slate-200 mt-1" />
                     )}
                   </div>
 
                   {/* ── Mobile: date + dot inline row ── */}
                   <div className="flex md:hidden items-center gap-2 col-span-2 mb-1">
                     <div
-                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white shrink-0 ${isLatest ? 'bg-blue-600' : 'bg-gray-300'}`}
+                      className={`w-2.5 h-2.5 rounded-full ring-4 ring-white/80 shrink-0 ${isLatest ? 'bg-indigo-600' : 'bg-slate-300'}`}
                     />
                     <time
                       dateTime={note.isoDate}
-                      className={`text-sm font-bold ${isLatest ? 'text-blue-600' : 'text-gray-500'}`}
+                      className={`text-sm font-bold font-mono ${isLatest ? 'text-indigo-600' : 'text-slate-500'}`}
                     >
                       {note.date}
                     </time>
@@ -175,16 +188,16 @@ export default function ReleaseNotes() {
                   {/* ── Content Column ── */}
                   <div className="col-span-2 md:col-span-1 pl-5 md:pl-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-base font-semibold text-gray-900">{note.title}</h3>
+                      <h3 className="text-base font-semibold text-slate-800">{note.title}</h3>
                       {isLatest && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider rounded-full">
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider rounded-sm font-mono border border-emerald-200">
                           Latest
                         </span>
                       )}
                     </div>
 
                     {/* Fix #3: Semantic <ul>/<li> instead of <p> with bullet character */}
-                    <ul className="space-y-2 text-sm text-gray-600 list-disc list-outside pl-4 marker:text-gray-300">
+                    <ul className="space-y-2 text-sm text-slate-600 list-disc list-outside pl-4 marker:text-slate-300">
                       {note.changes.map((change) => (
                         <li key={`${noteKey}-${change.slice(0, 40)}`} className="leading-relaxed pl-1">
                           {renderText(change)}

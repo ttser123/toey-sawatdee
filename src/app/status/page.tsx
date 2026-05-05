@@ -43,17 +43,22 @@ const STALE_THRESHOLD_MINUTES = 3;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-function statusColor(s: ServiceStatus) {
+function statusDotColor(s: ServiceStatus) {
   if (s === 'operational') return 'bg-emerald-500';
   if (s === 'degraded') return 'bg-amber-500';
-  return 'bg-red-500';
+  return 'bg-rose-500';
+}
+
+function statusPingColor(s: ServiceStatus) {
+  if (s === 'operational') return 'bg-emerald-400';
+  return '';
 }
 
 function statusBadge(s: ServiceStatus) {
-  const base = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium tracking-wide';
-  if (s === 'operational') return `${base} bg-emerald-50 text-emerald-700`;
-  if (s === 'degraded') return `${base} bg-amber-50 text-amber-700`;
-  return `${base} bg-red-50 text-red-700`;
+  const base = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-sm text-xs font-mono font-medium tracking-wide border';
+  if (s === 'operational') return `${base} bg-emerald-50 text-emerald-700 border-emerald-200`;
+  if (s === 'degraded') return `${base} bg-amber-50 text-amber-700 border-amber-200`;
+  return `${base} bg-rose-50 text-rose-700 border-rose-200`;
 }
 
 function statusLabel(s: ServiceStatus) {
@@ -77,9 +82,9 @@ function overallStatus(groups: ServiceGroup[]): ServiceStatus {
 }
 
 function overallBannerClasses(s: ServiceStatus) {
-  if (s === 'operational') return 'bg-emerald-50 border-emerald-200 text-emerald-800';
-  if (s === 'degraded') return 'bg-amber-50 border-amber-200 text-amber-800';
-  return 'bg-red-50 border-red-200 text-red-800';
+  if (s === 'operational') return 'bg-emerald-50/80 border-emerald-300 text-emerald-800';
+  if (s === 'degraded') return 'bg-amber-50/80 border-amber-300 text-amber-800';
+  return 'bg-rose-50/80 border-rose-300 text-rose-800';
 }
 
 function overallBannerText(s: ServiceStatus) {
@@ -93,8 +98,6 @@ function overallBannerIcon(s: ServiceStatus) {
   if (s === 'degraded') return 'warning';
   return 'error';
 }
-
-// Real data doesn't have 90-day history yet, so we remove the mock bars generator.
 
 // ── Main Component ───────────────────────────────────────────────────
 
@@ -300,27 +303,27 @@ export default function StatusPage() {
   const overall = overallStatus(serviceGroups);
 
   return (
-    <main className="flex-1 overflow-auto bg-gray-50 p-6 md:p-8 lg:p-10">
+    <main className="flex-1 overflow-auto bg-blueprint p-6 md:p-8 lg:p-10">
       <div className="max-w-3xl mx-auto">
 
         {/* ── Header ────────────────────────────────────────── */}
         <div className="mb-6 flex items-center gap-3 px-1">
-          <span className="material-symbols-outlined text-gray-400 text-[28px]">monitor_heart</span>
+          <span className="material-symbols-outlined text-slate-400 text-[28px]">monitor_heart</span>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">System Status</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Real-time infrastructure health for toey-sawatdee.com
+            <h1 className="text-xl font-bold text-slate-800">System Status</h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Real-time infrastructure health for <span className="font-mono text-indigo-600">toey-sawatdee.com</span>
             </p>
           </div>
         </div>
 
         {/* ── Overall Status Banner ─────────────────────────── */}
-        <div className={`flex items-center gap-3 rounded-xl border p-4 mb-6 ${overallBannerClasses(overall)}`}>
+        <div className={`flex items-center gap-3 rounded-sm border p-4 mb-6 backdrop-blur-sm ${overallBannerClasses(overall)}`}>
           <span className="material-symbols-outlined text-[22px]">{overallBannerIcon(overall)}</span>
           <div className="flex-1">
-            <p className="font-semibold text-sm">{overallBannerText(overall)}</p>
+            <p className="font-semibold text-sm font-mono">{overallBannerText(overall)}</p>
             {lastChecked && (
-              <p className="text-xs opacity-70 mt-0.5">
+              <p className="text-xs opacity-70 mt-0.5 font-mono">
                 Last checked: {lastChecked.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </p>
             )}
@@ -328,27 +331,27 @@ export default function StatusPage() {
         </div>
 
         {/* ── Real-time Status Card ─────────────────────────── */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <div className="card-blueprint p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Infrastructure Health</h3>
-            <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-mono font-bold uppercase">Live Data</span>
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">Infrastructure Health</h3>
+            <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-sm font-mono font-bold uppercase border border-indigo-200">Live Data</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center">
-              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Latency</p>
-              <p className="text-lg font-mono font-bold text-gray-900">{displayLatency ? `${displayLatency}ms` : '---'}</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Latency</p>
+              <p className="text-lg font-mono font-bold text-slate-800">{displayLatency ? `${displayLatency}ms` : '---'}</p>
             </div>
-            <div className="text-center border-l border-gray-100">
-              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">CDN Cache</p>
+            <div className="text-center border-l border-slate-200">
+              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">CDN Cache</p>
               <p className="text-lg font-mono font-bold text-emerald-600">HIT</p>
             </div>
-            <div className="text-center border-l border-gray-100">
-              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Security</p>
-              <p className="text-lg font-mono font-bold text-gray-900">TLS 1.3</p>
+            <div className="text-center border-l border-slate-200">
+              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Security</p>
+              <p className="text-lg font-mono font-bold text-slate-800">TLS 1.3</p>
             </div>
-            <div className="text-center border-l border-gray-100">
-              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Region</p>
-              <p className="text-lg font-mono font-bold text-gray-900">SYD</p>
+            <div className="text-center border-l border-slate-200">
+              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Region</p>
+              <p className="text-lg font-mono font-bold text-slate-800">SYD</p>
             </div>
           </div>
         </div>
@@ -356,32 +359,38 @@ export default function StatusPage() {
         {/* ── Service Groups ─────────────────────────────────── */}
         <div className="space-y-4">
           {serviceGroups.map((group) => (
-            <div key={group.title} className="bg-white rounded-xl border border-gray-200">
+            <div key={group.title} className="card-blueprint overflow-hidden">
               {/* Group Header */}
-              <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-gray-100">
-                <span className="material-symbols-outlined text-gray-400 text-[18px]">{group.icon}</span>
-                <h3 className="text-sm font-semibold text-gray-900">{group.title}</h3>
+              <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-200">
+                <span className="material-symbols-outlined text-slate-400 text-[18px]">{group.icon}</span>
+                <h3 className="text-sm font-semibold text-slate-800">{group.title}</h3>
               </div>
 
               {/* Service Rows */}
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-slate-100">
                 {group.services.map((service) => (
                   <div
                     key={service.name}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-gray-50/50 transition-colors"
+                    className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${statusColor(service.status)}`} />
+                      {/* 6. Radar ping on operational status dots */}
+                      <span className="relative inline-flex h-2 w-2 shrink-0">
+                        {service.status === 'operational' && (
+                          <span className={`absolute inline-flex h-full w-full rounded-full ${statusPingColor(service.status)} animate-radar-ping`} />
+                        )}
+                        <span className={`relative inline-flex h-2 w-2 rounded-full ${statusDotColor(service.status)}`} />
+                      </span>
                       <div className="min-w-0">
-                        <p className="text-sm text-gray-800 font-medium truncate">{service.name}</p>
+                        <p className="text-sm text-slate-800 font-medium truncate">{service.name}</p>
                         {service.detail && (
-                          <p className="text-xs text-gray-400 font-mono truncate">{service.detail}</p>
+                          <p className="text-xs text-slate-400 font-mono truncate">{service.detail}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 ml-4">
                       {service.latency !== undefined && (
-                        <span className="text-xs text-gray-400 font-mono">{service.latency}ms</span>
+                        <span className="text-xs text-slate-400 font-mono">{service.latency}ms</span>
                       )}
                       <span className={statusBadge(service.status)}>{statusLabel(service.status)}</span>
                     </div>
@@ -396,9 +405,9 @@ export default function StatusPage() {
         <div className="mt-6">
           <button
             onClick={() => setShowRaw(!showRaw)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors w-full"
+            className="flex items-center gap-2 px-4 py-2.5 card-blueprint text-sm text-slate-600 hover:border-indigo-300 hover:text-slate-900 transition-colors w-full"
           >
-            <span className="font-mono font-bold text-gray-800">{`{ }`}</span>
+            <span className="font-mono font-bold text-slate-800">{`{ }`}</span>
             <span className="font-medium">View Raw API Payloads</span>
             <span className="material-symbols-outlined text-[18px] ml-auto transition-transform" style={{ transform: showRaw ? 'rotate(180deg)' : 'rotate(0deg)' }}>
               expand_more
@@ -406,9 +415,9 @@ export default function StatusPage() {
           </button>
 
           {showRaw && (
-            <div className="mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="mt-2 card-blueprint overflow-hidden">
               <div className="p-4 overflow-auto max-h-[60vh]">
-                <pre className="text-gray-700 font-mono text-[12px] leading-relaxed whitespace-pre-wrap">
+                <pre className="text-slate-700 font-mono text-[12px] leading-relaxed whitespace-pre-wrap">
                   {JSON.stringify(rawPayloads, null, 2)}
                 </pre>
               </div>
@@ -418,10 +427,10 @@ export default function StatusPage() {
 
         {/* ── Footer ──────────────────────────────────────────── */}
         <div className="mt-8 mb-4 text-center">
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-400 font-mono">
             Powered by AWS Lambda, API Gateway, DynamoDB, and CloudFront.
           </p>
-          <p className="text-xs text-gray-400 mt-1 font-mono">
+          <p className="text-xs text-slate-400 mt-1 font-mono">
             Region: ap-southeast-2 | Edge: BKK
           </p>
         </div>

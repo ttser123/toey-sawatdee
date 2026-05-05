@@ -35,7 +35,6 @@ interface StatCardProps {
     label: string;
     value: string | number;
     iconColor: string;
-    iconBg: string;
 }
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -61,19 +60,19 @@ const DEFAULTS: ZomboidData = {
 
 // ── Sub-components ───────────────────────────────────────────────────
 
-function StatCard({ icon, label, value, iconColor, iconBg }: StatCardProps) {
+function StatCard({ icon, label, value, iconColor }: StatCardProps) {
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div className="card-blueprint p-5 flex items-center gap-4 transition-colors hover:border-indigo-300">
             <span
-                className={`material-symbols-outlined text-[22px] ${iconColor} ${iconBg} p-2.5 rounded-lg`}
+                className={`material-symbols-outlined text-[22px] ${iconColor} bg-slate-50 p-2.5 rounded-sm`}
             >
                 {icon}
             </span>
             <div>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">
                     {label}
                 </p>
-                <p className="text-lg font-bold text-gray-900">{value}</p>
+                <p className="text-lg font-bold text-slate-800 font-mono">{value}</p>
             </div>
         </div>
     );
@@ -82,7 +81,7 @@ function StatCard({ icon, label, value, iconColor, iconBg }: StatCardProps) {
 function SessionStatRow({
     label,
     value,
-    valueColor = "text-gray-900",
+    valueColor = "text-slate-800",
     hasBorder = true,
 }: {
     label: string;
@@ -92,23 +91,35 @@ function SessionStatRow({
 }) {
     return (
         <div
-            className={`flex justify-between items-center ${hasBorder ? "pb-3 border-b border-gray-100" : "pt-1"}`}
+            className={`flex justify-between items-center ${hasBorder ? "pb-3 border-b border-slate-200" : "pt-1"}`}
         >
-            <span className="text-sm text-gray-500 font-medium">{label}</span>
-            <span className={`text-base font-bold ${valueColor}`}>{value}</span>
+            <span className="text-sm text-slate-500 font-medium">{label}</span>
+            <span className={`text-base font-bold font-mono ${valueColor}`}>{value}</span>
         </div>
     );
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-/** Returns "OFFLINE" if the last update is stale (> threshold) or explicitly offline. */
+/** Returns "OFFLINE" if the last update is stale (>threshold) or explicitly offline. */
 function deriveStatus(data: ZomboidData): "ONLINE" | "OFFLINE" {
     if (data.status === "OFFLINE" || !data.timestamp) return "OFFLINE";
 
     const diffMinutes =
         (Date.now() - new Date(data.timestamp).getTime()) / (1000 * 60);
     return diffMinutes > STALE_THRESHOLD_MINUTES ? "OFFLINE" : "ONLINE";
+}
+
+/** Format a date string for display */
+function formatDate(dateStr: string): string {
+    try {
+        return new Date(dateStr).toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        });
+    } catch {
+        return "—";
+    }
 }
 
 // ── Main Component ───────────────────────────────────────────────────
@@ -146,64 +157,78 @@ export default function ZomboidStatus() {
     const actualStatus = deriveStatus(data);
     const isOnline = actualStatus === "ONLINE";
 
+    // ── Derive "last known snapshot" when offline ────────────────────
+    // The backend doesn't always push a lastSession object, but the
+    // main payload still holds the last-known state (players, ping, etc.).
+    // We expose this as a "Last Known Snapshot" when the server is offline.
+    const hasBackendSession = !!data.lastSession;
+    const hasSnapshotData = !!data.timestamp;
+
     return (
         <div className="space-y-6">
             {/* ── Offline Banner ──────────────────────────────────── */}
             {!isOnline && (
-                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
-                    <span className="material-symbols-outlined text-amber-500 text-[22px] shrink-0">
+                <div className="flex items-center gap-3 border-2 border-dashed border-slate-300 bg-white/60 backdrop-blur-sm rounded-sm p-4 text-sm text-slate-600 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <span className="material-symbols-outlined text-slate-400 text-[22px] shrink-0">
                         notification_important
                     </span>
                     <p className="leading-relaxed font-medium">
-                        Server is currently offline. Statistics will update automatically (every 60s) once online.
+                        Server is currently offline. Statistics will update automatically (every <span className="font-mono text-indigo-600">60s</span>) once online.
                     </p>
                 </div>
             )}
 
             {/* ── Server Header ─────────────────────────────────── */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-blue-600 bg-blue-50 p-2.5 rounded-lg">
+            <div className="card-blueprint p-6 md:p-8 transition-colors hover:border-indigo-300">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2.5 rounded-sm shrink-0">
                             dns
                         </span>
-                        <div>
-                            <h2 className="text-lg font-bold text-gray-900">
+                        <div className="min-w-0">
+                            <h2 className="text-lg font-bold text-slate-800 truncate">
                                 {data.serverName || "Project Zomboid Server"}
                             </h2>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-xs text-slate-400 mt-0.5 font-mono">
                                 ID: {data.id}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {/* Raw Payload Button */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        {/* Raw Payload Button — full text on sm+, icon-only on mobile */}
                         <button
                             onClick={() => setShowRaw(true)}
-                            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-600 hover:text-gray-900 transition-colors font-mono text-[11px] font-medium tracking-wide"
+                            className="flex items-center gap-1.5 px-2 py-1 sm:px-2.5 rounded-sm bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-600 hover:text-slate-900 transition-colors font-mono text-[11px] font-medium tracking-wide"
                         >
-                            <span className="text-gray-800 font-bold">{`{ }`}</span> View Raw Payload
+                            <span className="text-slate-800 font-bold">{`{ }`}</span>
+                            <span className="hidden sm:inline">View Raw Payload</span>
                         </button>
 
                         {/* Status badge */}
                         <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide ${isOnline
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-500"
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-sm text-xs font-semibold tracking-wide font-mono ${isOnline
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-slate-100 text-slate-500 border border-slate-300"
                                 }`}
                         >
-                            <span
-                                className={`inline-block w-2 h-2 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
-                                    }`}
-                            />
+                            {/* 6. Radar ping for ONLINE status dot */}
+                            <span className="relative inline-flex h-2 w-2">
+                                {isOnline && (
+                                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 animate-radar-ping" />
+                                )}
+                                <span
+                                    className={`relative inline-flex h-2 w-2 rounded-full ${isOnline ? "bg-emerald-500" : "bg-slate-400"
+                                        }`}
+                                />
+                            </span>
                             {actualStatus}
                         </span>
                     </div>
                 </div>
 
                 {loading && (
-                    <p className="text-xs text-gray-400 mt-3 animate-pulse">
+                    <p className="text-xs text-slate-400 mt-3 animate-pulse font-mono">
                         Refreshing server data…
                     </p>
                 )}
@@ -215,48 +240,37 @@ export default function ZomboidStatus() {
                     icon="map"
                     label="Map"
                     value={isOnline ? (data.map || "—") : "—"}
-                    iconColor="text-blue-600"
-                    iconBg="bg-blue-50"
+                    iconColor="text-indigo-600"
                 />
                 <StatCard
                     icon="group"
                     label="Players"
                     value={isOnline ? `${data.onlinePlayers ?? 0} / ${data.maxPlayers ?? 0}` : "0 / 0"}
                     iconColor="text-emerald-600"
-                    iconBg="bg-emerald-50"
                 />
                 <StatCard
                     icon="network_ping"
                     label="Ping"
                     value={isOnline ? `${data.ping ?? 0} ms` : "0 ms"}
-                    iconColor="text-amber-600"
-                    iconBg="bg-amber-50"
+                    iconColor="text-indigo-600"
                 />
                 <StatCard
                     icon="schedule"
                     label="Last Update"
-                    value={
-                        data.timestamp
-                            ? new Date(data.timestamp).toLocaleString("en-US", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                            })
-                            : "—"
-                    }
-                    iconColor="text-purple-600"
-                    iconBg="bg-purple-50"
+                    value={data.timestamp ? formatDate(data.timestamp) : "—"}
+                    iconColor="text-slate-500"
                 />
             </div>
 
             {/* ── Dynamic Content: Online vs Offline View ───────── */}
             {isOnline ? (
                 /* 🟢 ONLINE: Active Players */
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
+                <div className="card-blueprint p-6 md:p-8 transition-colors hover:border-indigo-300">
                     <div className="flex items-center gap-3 mb-5">
-                        <span className="material-symbols-outlined text-teal-600 bg-teal-50 p-2.5 rounded-lg">
+                        <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2.5 rounded-sm">
                             person
                         </span>
-                        <h3 className="text-lg font-bold text-gray-900">
+                        <h3 className="text-lg font-bold text-slate-800">
                             Online Players
                         </h3>
                     </div>
@@ -266,79 +280,156 @@ export default function ZomboidStatus() {
                             {data.playersList.map((player) => (
                                 <li
                                     key={player.name}
-                                    className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100"
+                                    className="flex items-center justify-between bg-slate-50/60 rounded-sm px-4 py-3 border border-slate-200"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className="material-symbols-outlined text-gray-400 text-[18px]">
+                                        <span className="material-symbols-outlined text-slate-400 text-[18px]">
                                             person
                                         </span>
-                                        <span className="text-sm font-medium text-gray-800">
+                                        <span className="text-sm font-medium text-slate-800 font-mono">
                                             {player.name}
                                         </span>
                                     </div>
-                                    <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">
+                                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-sm font-mono font-medium border border-indigo-200">
                                         {player.onlineTimeMinutes} min
                                     </span>
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <div className="text-center py-8">
-                            <span className="material-symbols-outlined text-gray-300 text-[40px] mb-2">
+                        <div className="text-center py-8 border-2 border-dashed border-slate-300 rounded-sm">
+                            <span className="material-symbols-outlined text-slate-300 text-[40px] mb-2">
                                 group_off
                             </span>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-slate-400 font-mono">
                                 No players are currently connected.
                             </p>
                         </div>
                     )}
                 </div>
             ) : (
-                /* 🔴 OFFLINE: Last Session Stats */
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-3 mb-5">
-                        <span className="material-symbols-outlined text-purple-600 bg-purple-50 p-2.5 rounded-lg">
-                            history
-                        </span>
-                        <h3 className="text-lg font-bold text-gray-900">
-                            Last Session Stats
-                        </h3>
+                /* 🔴 OFFLINE: Last Session / Last Known Snapshot */
+                <div className="space-y-6">
+                    {/* ── Last Session Stats (from Guardian Agent or derived snapshot) ── */}
+                    <div className="card-blueprint p-6 md:p-8 transition-colors hover:border-indigo-300">
+                        <div className="flex items-center justify-between mb-5">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2.5 rounded-sm">
+                                    history
+                                </span>
+                                <h3 className="text-lg font-bold text-slate-800">
+                                    Last Session Snapshot
+                                </h3>
+                            </div>
+                            {data.timestamp && (
+                                <span className="text-xs text-slate-400 font-mono font-medium">
+                                    Data from: {formatDate(data.timestamp)}
+                                </span>
+                            )}
+                        </div>
+
+                        {hasBackendSession ? (
+                            /* Guardian Agent pushed full session data */
+                            <div className="space-y-4">
+                                <SessionStatRow
+                                    label="Session Uptime"
+                                    value={`${data.lastSession!.uptimeHours} Hours`}
+                                />
+                                <SessionStatRow
+                                    label="Peak Players"
+                                    value={`${data.lastSession!.peakPlayers} Players`}
+                                    valueColor="text-emerald-600"
+                                />
+                                <SessionStatRow
+                                    label="Average Ping"
+                                    value={`${data.lastSession!.avgPing} ms`}
+                                    valueColor="text-indigo-600"
+                                />
+                                <SessionStatRow
+                                    label="Offline Since"
+                                    value={formatDate(data.lastSession!.closedAt)}
+                                    hasBorder={false}
+                                />
+                            </div>
+                        ) : hasSnapshotData ? (
+                            /* No Guardian session, but we have the last-known payload data */
+                            <div className="space-y-4">
+                                <SessionStatRow
+                                    label="Server Name"
+                                    value={data.serverName || "—"}
+                                />
+                                <SessionStatRow
+                                    label="Map"
+                                    value={data.map || "—"}
+                                />
+                                <SessionStatRow
+                                    label="Players at Last Check"
+                                    value={`${data.onlinePlayers ?? 0} / ${data.maxPlayers ?? 0}`}
+                                    valueColor="text-emerald-600"
+                                />
+                                <SessionStatRow
+                                    label="Last Known Ping"
+                                    value={`${data.ping ?? 0} ms`}
+                                    valueColor="text-indigo-600"
+                                />
+                                <SessionStatRow
+                                    label="Last Seen Online"
+                                    value={formatDate(data.timestamp)}
+                                    hasBorder={false}
+                                />
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 flex flex-col justify-center items-center border-2 border-dashed border-slate-300 rounded-sm">
+                                <span className="material-symbols-outlined text-slate-300 text-[40px] mb-2">
+                                    hourglass_empty
+                                </span>
+                                <p className="text-sm text-slate-400 font-mono">
+                                    No session data available yet.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
-                    {data.lastSession ? (
-                        <div className="space-y-4">
-                            <SessionStatRow
-                                label="Session Uptime"
-                                value={`${data.lastSession.uptimeHours} Hours`}
-                            />
-                            <SessionStatRow
-                                label="Peak Players"
-                                value={`${data.lastSession.peakPlayers} Players`}
-                                valueColor="text-emerald-600"
-                            />
-                            <SessionStatRow
-                                label="Average Ping"
-                                value={`${data.lastSession.avgPing} ms`}
-                                valueColor="text-amber-600"
-                            />
-                            <SessionStatRow
-                                label="Offline Since"
-                                value={new Date(
-                                    data.lastSession.closedAt
-                                ).toLocaleString("en-US", {
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                })}
-                                hasBorder={false}
-                            />
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 flex flex-col justify-center items-center">
-                            <span className="material-symbols-outlined text-gray-300 text-[40px] mb-2">
-                                hourglass_empty
-                            </span>
-                            <p className="text-sm text-gray-400">
-                                Historical data is currently unavailable.
+                    {/* ── Last Known Players ──────────────────────────── */}
+                    {data.playersList && data.playersList.length > 0 && (
+                        <div className="card-blueprint p-6 md:p-8 transition-colors hover:border-indigo-300">
+                            <div className="flex items-center justify-between mb-5">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2.5 rounded-sm">
+                                        group
+                                    </span>
+                                    <h3 className="text-lg font-bold text-slate-800">
+                                        Last Known Players
+                                    </h3>
+                                </div>
+                                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-sm font-mono font-medium border border-slate-300">
+                                    {data.playersList.length} player{data.playersList.length !== 1 ? "s" : ""}
+                                </span>
+                            </div>
+
+                            <ul className="space-y-2">
+                                {data.playersList.map((player) => (
+                                    <li
+                                        key={player.name}
+                                        className="flex items-center justify-between bg-slate-50/60 rounded-sm px-4 py-3 border border-slate-200"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-symbols-outlined text-slate-400 text-[18px]">
+                                                person
+                                            </span>
+                                            <span className="text-sm font-medium text-slate-800 font-mono">
+                                                {player.name}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-sm font-mono font-medium border border-slate-200">
+                                            {player.onlineTimeMinutes} min
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <p className="text-xs text-slate-400 mt-3 font-mono">
+                                Snapshot from last online session — {formatDate(data.timestamp)}
                             </p>
                         </div>
                     )}
@@ -347,30 +438,27 @@ export default function ZomboidStatus() {
 
             {/* ── Active Mods (always visible) ────────────────────── */}
             {data.modsList && data.modsList.length > 0 && (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8 hover:shadow-md transition-shadow">
+                <div className="card-blueprint p-6 md:p-8 transition-colors hover:border-indigo-300">
                     <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                            <span className="material-symbols-outlined text-orange-600 bg-orange-50 p-2.5 rounded-lg">
+                            <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2.5 rounded-sm">
                                 extension
                             </span>
-                            <h3 className="text-lg font-bold text-gray-900">
-                                Active Mods ({data.modsList.length})
+                            <h3 className="text-lg font-bold text-slate-800">
+                                Active Mods (<span className="font-mono">{data.modsList.length}</span>)
                             </h3>
                         </div>
                         {!isOnline && data.timestamp && (
-                            <span className="text-xs text-gray-400 font-medium">
+                            <span className="text-xs text-slate-400 font-mono font-medium">
                                 Last updated:{" "}
-                                {new Date(data.timestamp).toLocaleString("en-US", {
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                })}
+                                {formatDate(data.timestamp)}
                             </span>
                         )}
                     </div>
 
                     {/* Search */}
                     <div className="relative mb-4">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">
                             search
                         </span>
                         <input
@@ -378,12 +466,12 @@ export default function ZomboidStatus() {
                             placeholder="Search mods..."
                             value={modSearch}
                             onChange={(e) => setModSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 transition-colors"
+                            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-sm bg-white/60 text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors font-mono"
                         />
                         {modSearch && (
                             <button
                                 onClick={() => setModSearch("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                             >
                                 <span className="material-symbols-outlined text-[16px]">close</span>
                             </button>
@@ -400,23 +488,23 @@ export default function ZomboidStatus() {
                                 {filtered.map((modName, index) => (
                                     <li
                                         key={modName}
-                                        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-orange-50 transition-colors group"
+                                        className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-indigo-50 transition-colors group border border-transparent hover:border-indigo-200"
                                     >
-                                        <span className="text-xs text-gray-300 font-mono w-6 text-right shrink-0 group-hover:text-orange-400">
+                                        <span className="text-xs text-slate-300 font-mono w-6 text-right shrink-0 group-hover:text-indigo-400">
                                             {index + 1}
                                         </span>
-                                        <span className="text-sm text-gray-700 font-medium group-hover:text-orange-700">
+                                        <span className="text-sm text-slate-700 font-medium font-mono group-hover:text-indigo-700">
                                             {modName}
                                         </span>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <div className="text-center py-6">
-                                <span className="material-symbols-outlined text-gray-300 text-[32px] mb-1">
+                            <div className="text-center py-6 border-2 border-dashed border-slate-300 rounded-sm">
+                                <span className="material-symbols-outlined text-slate-300 text-[32px] mb-1">
                                     search_off
                                 </span>
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-slate-400 font-mono">
                                     No mods matching &ldquo;{modSearch}&rdquo;
                                 </p>
                             </div>
@@ -427,18 +515,18 @@ export default function ZomboidStatus() {
 
             {showRaw && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowRaw(false)}>
-                    <div className="bg-white border border-gray-200 rounded-xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200">
-                            <div className="flex items-center gap-2.5 text-gray-700 font-mono text-sm tracking-wide">
-                                <span className="text-gray-900 font-bold text-lg leading-none mt-[-2px]">{`{ }`}</span>
+                    <div className="bg-white/95 backdrop-blur-md border border-slate-300 rounded-sm w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-4 bg-slate-50 border-b border-slate-300">
+                            <div className="flex items-center gap-2.5 text-slate-700 font-mono text-sm tracking-wide">
+                                <span className="text-slate-900 font-bold text-lg leading-none mt-[-2px]">{`{ }`}</span>
                                 <span>lambda_response.json</span>
                             </div>
-                            <button onClick={() => setShowRaw(false)} className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => setShowRaw(false)} className="p-1.5 rounded-sm hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors">
                                 <span className="material-symbols-outlined text-[20px] block">close</span>
                             </button>
                         </div>
-                        <div className="p-5 overflow-auto flex-1 custom-scrollbar bg-white">
-                            <pre className="text-gray-800 font-mono text-[13px] leading-relaxed selection:bg-blue-100 selection:text-blue-900">
+                        <div className="p-5 overflow-auto flex-1 custom-scrollbar bg-white/90">
+                            <pre className="text-slate-800 font-mono text-[13px] leading-relaxed selection:bg-indigo-100 selection:text-indigo-900">
                                 {JSON.stringify(data, null, 2)}
                             </pre>
                         </div>

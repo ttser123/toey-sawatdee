@@ -14,7 +14,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     return (
         <AuthProvider>
-            <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden relative">
+            <div className="flex flex-col md:flex-row h-screen bg-blueprint overflow-hidden relative">
                 <Sidebar />
                 {children}
             </div>

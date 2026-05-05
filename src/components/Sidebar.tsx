@@ -144,9 +144,9 @@ export default function Sidebar() {
       <Link
         href={href}
         title={!isOpen ? label : undefined}
-        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
-          ? 'bg-blue-50 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        className={`group relative flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-colors ${isActive
+          ? 'bg-indigo-50 text-indigo-600 border border-indigo-200'
+          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
           }`}
       >
         <span className="material-symbols-outlined text-lg shrink-0">{icon}</span>
@@ -164,13 +164,13 @@ export default function Sidebar() {
       <Link
         href={href}
         title={!isOpen ? label : undefined}
-        className={`group relative flex items-center gap-2.5 pl-9 pr-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 ${isActive
-          ? 'bg-indigo-50 text-indigo-600'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+        className={`group relative flex items-center gap-2.5 pl-9 pr-3 py-2 rounded-sm text-[13px] font-medium transition-all duration-200 ${isActive
+          ? 'bg-indigo-50 text-indigo-600 border border-indigo-200'
+          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
           }`}
       >
         {icon && (
-          <span className={`material-symbols-outlined text-[16px] shrink-0 ${isActive ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-600'}`}>
+          <span className={`material-symbols-outlined text-[16px] shrink-0 ${isActive ? 'text-indigo-500' : 'text-slate-400 group-hover:text-slate-600'}`}>
             {icon}
           </span>
         )}
@@ -178,9 +178,9 @@ export default function Sidebar() {
           {label}
         </span>
         {zone && (
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wider shrink-0 ${isOpen ? 'md:inline-flex' : 'md:hidden'} ${isActive
-            ? 'bg-indigo-100 text-indigo-500'
-            : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200 group-hover:text-gray-500'
+          <span className={`text-[9px] font-bold font-mono px-1.5 py-0.5 rounded-sm tracking-wider shrink-0 ${isOpen ? 'md:inline-flex' : 'md:hidden'} ${isActive
+            ? 'bg-indigo-100 text-indigo-500 border border-indigo-200'
+            : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-500 border border-slate-200'
             }`}>
             {zone}
           </span>
@@ -192,11 +192,11 @@ export default function Sidebar() {
   return (
     <>
       {/* ── Fix #7: Semantic <header> for Mobile Topbar ──────────── */}
-      <header className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 h-14 px-4 shrink-0">
-        <span className="font-semibold text-gray-900 text-sm">Toey Sawatdee</span>
+      <header className="md:hidden flex items-center justify-between bg-white/90 backdrop-blur-sm border-b border-slate-200 h-14 px-4 shrink-0">
+        <span className="font-semibold text-slate-800 text-sm">Toey Sawatdee</span>
         <button
           onClick={() => setIsMobileOpen(true)}
-          className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-md"
+          className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-sm"
           aria-label="Open navigation menu"
         >
           <span className="material-symbols-outlined">menu</span>
@@ -215,7 +215,7 @@ export default function Sidebar() {
       {/* Actual Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col shrink-0 transition-all duration-300 overflow-x-hidden
+          fixed inset-y-0 left-0 z-50 bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col shrink-0 transition-all duration-300 overflow-x-hidden
           md:relative md:translate-x-0
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
           w-64 ${isOpen ? 'md:w-60' : 'md:w-[60px]'}
@@ -224,14 +224,14 @@ export default function Sidebar() {
         aria-label="Main navigation"
       >
         {/* Header */}
-        <div className="h-14 flex items-center justify-between px-3 border-b border-gray-200">
+        <div className="h-14 flex items-center justify-between px-3 border-b border-slate-200">
           {/* Always show title on mobile, check isOpen on desktop */}
-          <span className={`font-semibold text-gray-900 text-sm whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>Toey Sawatdee</span>
+          <span className={`font-semibold text-slate-800 text-sm whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>Toey Sawatdee</span>
 
           {/* Mobile close button */}
           <button
             onClick={() => setIsMobileOpen(false)}
-            className="md:hidden p-1.5 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="md:hidden p-1.5 rounded-sm text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             aria-label="Close navigation menu"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -248,7 +248,7 @@ export default function Sidebar() {
                 setIsOpen(!isOpen);
               }
             }}
-            className="hidden md:block p-1.5 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="hidden md:block p-1.5 rounded-sm text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             aria-label="Toggle sidebar"
             aria-expanded={isOpen}
           >
@@ -279,9 +279,9 @@ export default function Sidebar() {
               title={!isOpen ? 'Games Server' : undefined}
               aria-expanded={gamesOpen}
               aria-controls={GAMES_DROPDOWN_ID}
-              className={`w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isGameRouteActive
+              className={`w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-colors ${isGameRouteActive
                 ? 'bg-indigo-50/60 text-indigo-600'
-                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                 }`}
             >
               <span className={`material-symbols-outlined text-lg shrink-0 ${isGameRouteActive ? 'text-indigo-500' : ''}`}>
@@ -294,7 +294,7 @@ export default function Sidebar() {
               {isOpen && (
                 <span
                   className={`material-symbols-outlined text-[16px] shrink-0 transition-transform duration-300 ${gamesOpen ? 'rotate-180' : 'rotate-0'
-                    } ${isGameRouteActive ? 'text-indigo-400' : 'text-gray-400'}`}
+                    } ${isGameRouteActive ? 'text-indigo-400' : 'text-slate-400'}`}
                 >
                   expand_more
                 </span>
@@ -333,8 +333,8 @@ export default function Sidebar() {
           {/* Admin zone — Only when authenticated */}
           {isAuthenticated && (
             <>
-              <div className="border-t border-gray-200 my-3" />
-              <p className={`text-[11px] text-gray-400 uppercase tracking-wider px-3 mb-1 font-medium whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>
+              <div className="border-t border-slate-200 my-3" />
+              <p className={`text-[11px] text-slate-400 uppercase tracking-wider px-3 mb-1 font-medium font-mono whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>
                 Admin
               </p>
               {adminNav.map((item) => (
@@ -345,16 +345,16 @@ export default function Sidebar() {
         </nav>
 
         {/* ── Fix #7: Semantic <footer> ──────────────────────────── */}
-        <footer className="p-2 border-t border-gray-200">
+        <footer className="p-2 border-t border-slate-200">
           {/* Professional Links */}
           <div className={`flex flex-col px-3 py-2 mb-1 ${isOpen ? 'md:flex' : 'md:hidden'}`}>
-            <h3 className="text-[11px] text-gray-400 uppercase tracking-wider font-medium mb-3">My Contact</h3>
+            <h3 className="text-[11px] text-slate-400 uppercase tracking-wider font-medium font-mono mb-3">My Contact</h3>
             <div className="flex items-center gap-4 mb-3">
               <a
                 href="https://github.com/ttser123"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-gray-900 transition-colors"
+                className="text-slate-400 hover:text-slate-800 transition-colors"
                 title="GitHub"
               >
                 <FaGithub className="text-[20px]" />
@@ -363,42 +363,42 @@ export default function Sidebar() {
                 href="https://www.linkedin.com/in/parinya-sawatdee"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-[#0a66c2] transition-colors"
+                className="text-slate-400 hover:text-indigo-600 transition-colors"
                 title="LinkedIn"
               >
                 <FaLinkedin className="text-[20px]" />
               </a>
             </div>
 
-            <div className="flex items-center gap-2 text-gray-500">
+            <div className="flex items-center gap-2 text-slate-500">
               <FaEnvelope className="text-[13px] shrink-0" />
-              <span className="text-[11px] font-medium select-all hover:text-gray-800 transition-colors cursor-text">
+              <span className="text-[11px] font-medium font-mono select-all hover:text-slate-800 transition-colors cursor-text">
                 parinya.zawatdee@gmail.com
               </span>
             </div>
           </div>
 
           <div
-            className="group relative flex items-center gap-3 px-3 py-2.5 mb-1 text-gray-500 cursor-default hover:bg-gray-50 rounded-lg transition-colors"
+            className="group relative flex items-center gap-3 px-3 py-2.5 mb-1 text-slate-500 cursor-default hover:bg-slate-50 rounded-sm transition-colors"
             title={!isOpen ? `Profile Views: ${visitorCount}` : undefined}
           >
             <span className="material-symbols-outlined text-lg shrink-0">visibility</span>
-            <span className={`text-xs font-medium whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>
+            <span className={`text-xs font-medium font-mono whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>
               Profile Views: {visitorCount}
             </span>
           </div>
 
           {/* ── Fix #6: Skeleton loader instead of null during auth check ── */}
           {isLoading ? (
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg animate-pulse">
-              <div className="w-5 h-5 bg-gray-200 rounded shrink-0" />
-              <div className={`h-4 bg-gray-200 rounded w-20 ${isOpen ? 'md:block' : 'md:hidden'}`} />
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm animate-pulse">
+              <div className="w-5 h-5 bg-slate-200 rounded-sm shrink-0" />
+              <div className={`h-4 bg-slate-200 rounded-sm w-20 ${isOpen ? 'md:block' : 'md:hidden'}`} />
             </div>
           ) : isAuthenticated ? (
             <button
               onClick={handleLogout}
               title={!isOpen ? "Logout" : undefined}
-              className="group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors"
+              className="group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-rose-600 hover:bg-rose-50 transition-colors"
             >
               <span className="material-symbols-outlined text-lg shrink-0">logout</span>
               <span className={`whitespace-nowrap block ${isOpen ? 'md:block' : 'md:hidden'}`}>Logout</span>

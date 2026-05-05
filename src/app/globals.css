@@ -128,3 +128,38 @@
     @apply font-sans;
   }
 }
+
+/* ── Blueprint Design System ─────────────────────────────────────── */
+
+/* 1. Graph-paper grid background */
+.bg-blueprint {
+  background-color: #f8fafc; /* slate-50 */
+  background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* 5. Tracing-paper translucent card */
+.card-blueprint {
+  background-color: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid #cbd5e1; /* slate-300 */
+  border-radius: 2px; /* sharp edges */
+}
+
+/* 6. Radar ping animation for status dots */
+@keyframes radar-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.animate-radar-ping {
+  animation: radar-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
