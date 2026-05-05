@@ -3,7 +3,11 @@
 > A production-grade, serverless portfolio engineered as a **real-time system status dashboard** — not a landing page.  
 > Built on AWS (S3, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, and a custom **Blueprint design system**.
 
+<<<<<<< HEAD
 ### [Live Demo → toey-sawatdee.me](https://toey-sawatdee.me)
+=======
+### 🔗 **[Live Demo → toey-sawatdee.me](https://toey-sawatdee.me)**
+>>>>>>> bd9b7e627b4522b3b74e2b847d3f47dd8d49add1
 
 ---
 
