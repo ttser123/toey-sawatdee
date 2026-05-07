@@ -39,11 +39,11 @@ export const RuleValidation = () => {
   ];
 
   return (
-    <section className="card-blueprint p-6 md:p-8 space-y-8 bg-white/40 backdrop-blur-md border-slate-200">
+    <section className="card-blueprint p-6 md:p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-slate-800">
           <span className="material-symbols-outlined bg-slate-100 p-2 text-slate-600 rounded-sm">analytics</span>
-          <h2 className="text-xl font-black uppercase tracking-tight font-mono">50_30_20_Protocol</h2>
+          <h2 className="text-xl font-bold uppercase tracking-tight text-slate-800">50_30_20_Protocol</h2>
         </div>
         <div className="text-right">
           <span className="text-[10px] font-black text-slate-400 block uppercase tracking-widest">Monthly_Fuel_Level</span>
@@ -62,7 +62,7 @@ export const RuleValidation = () => {
                 <p className="text-[9px] text-slate-400 font-mono uppercase tracking-[0.2em]">{r.desc}</p>
               </div>
               <div className="text-right">
-                <span className={`text-lg font-black block ${r.color === 'rose' ? 'text-rose-600' : 'text-slate-900'}`}>
+                <span className={`text-lg font-black block ${r.color === 'rose' ? 'text-rose-600' : 'text-slate-800'}`}>
                   {formatNumber(r.val)}%
                 </span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">
@@ -75,7 +75,7 @@ export const RuleValidation = () => {
               <ProgressBar percentage={r.val} color={r.color as any} />
               {r.label.includes('WANTS') && r.val > 30 && (
                 <div className="absolute -top-4 right-0">
-                  <Badge variant="rose" className="animate-bounce shadow-lg">Gilt_Detected // Excess_Spending</Badge>
+                  <Badge variant="rose" className="animate-bounce shadow-none">Gilt_Detected // Excess_Spending</Badge>
                 </div>
               )}
               {r.label.includes('SAVINGS') && r.val < 20 && (
@@ -90,8 +90,10 @@ export const RuleValidation = () => {
       
       <div className="pt-6 border-t border-slate-200 flex justify-between items-center">
         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System_Status</span>
-        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-sm ${
-          necP <= 50 && wantP <= 30 && saveP >= 20 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-sm border ${
+          necP <= 50 && wantP <= 30 && saveP >= 20 
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+            : 'bg-slate-50 text-slate-600 border-slate-200'
         }`}>
           {necP <= 50 && wantP <= 30 && saveP >= 20 ? 'OPTIMIZED_ALLOCATION' : 'REBALANCING_REQUIRED'}
         </span>
@@ -99,3 +101,4 @@ export const RuleValidation = () => {
     </section>
   );
 };
+

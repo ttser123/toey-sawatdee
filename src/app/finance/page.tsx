@@ -8,7 +8,6 @@ import { AssetForm } from '@/components/forms/AssetForm';
 import { IncomeForm } from '@/components/forms/IncomeForm';
 import { ExpenseForm } from '@/components/forms/ExpenseForm';
 import { GoalForm } from '@/components/forms/GoalForm';
-import { useFinanceStore } from '@/lib/finance-store';
 
 type RecordTab = 'assets' | 'incomes' | 'expenses' | 'goals';
 
@@ -39,11 +38,10 @@ export default function FinancePage() {
             <button
               key={tab}
               onClick={() => setRecordTab(tab)}
-              className={`px-4 py-2 text-[10px] font-black font-mono uppercase tracking-widest border transition-all ${
-                recordTab === tab
+              className={`px-4 py-2 text-[10px] font-black font-mono uppercase tracking-widest border transition-all ${recordTab === tab
                   ? 'bg-slate-800 text-white border-slate-900'
                   : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -67,11 +65,10 @@ export default function FinancePage() {
           <button
             key={mode.id}
             onClick={() => setActiveMode(mode.id as any)}
-            className={`flex items-center gap-2 px-6 py-2.5 text-[11px] font-black font-mono uppercase tracking-widest transition-all border ${
-              activeMode === mode.id 
-                ? 'bg-indigo-600 text-white border-indigo-700 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.3)]' 
+            className={`flex items-center gap-2 px-6 py-2.5 text-[11px] font-black font-mono uppercase tracking-widest transition-all border ${activeMode === mode.id
+                ? 'bg-indigo-600 text-white border-indigo-700 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.3)]'
                 : 'bg-white/50 text-slate-500 border-slate-300 hover:bg-slate-100'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-sm">{mode.icon}</span>
             [{mode.label}]
@@ -94,7 +91,10 @@ export default function FinancePage() {
 
             {/* ZONE C: ACTIVE MISSIONS (30-40%) */}
             <div className="w-full lg:w-1/3">
-              <GoalTracker />
+              <GoalTracker onAddMission={() => {
+                setActiveMode('input_buffer');
+                setRecordTab('goals');
+              }} />
             </div>
           </div>
         </div>

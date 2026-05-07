@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { useFinanceStore, type Frequency } from '@/lib/finance-store';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatMonth } from '@/lib/utils';
 
 export const IncomeForm = () => {
   const store = useFinanceStore();
   const [form, setForm] = useState({ label: '', amount: '', freq: 'monthly' as Frequency, target: store.viewMonth });
+  const [editDraft, setEditDraft] = useState<{ id: string | null, label: string, amount: string, freq: Frequency, target: string }>({
+    id: null,
+    label: '',
+    amount: '',
+    freq: 'monthly',
+    target: store.viewMonth
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +23,22 @@ export const IncomeForm = () => {
       targetMonth: (form.freq === 'one-time' || form.freq === 'yearly') ? form.target : undefined 
     });
     setForm({ ...form, label: '', amount: '' });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editDraft.id) return;
+    const cleanLabel = editDraft.label.trim();
+    if (!cleanLabel) return alert("Error: Label cannot be empty.");
+    const parsedAmount = parseFloat(editDraft.amount);
+    if (isNaN(parsedAmount)) return alert("Error: Invalid amount.");
+
+    store.updateIncome(editDraft.id, {
+      label: cleanLabel,
+      amount: parsedAmount,
+      frequency: editDraft.freq,
+      targetMonth: (editDraft.freq === 'one-time' || editDraft.freq === 'yearly') ? editDraft.target : undefined
+    });
+    setEditDraft({ id: null, label: '', amount: '', freq: 'monthly', target: store.viewMonth });
   };
 
   return (
@@ -37,7 +60,7 @@ export const IncomeForm = () => {
                 <th className="pb-3 pl-2">Source_Label</th>
                 <th className="pb-3 text-center">Frequency</th>
                 <th className="pb-3 text-right">Value_Amount</th>
-                <th className="pb-3 text-right pr-2 w-10">Actions</th>
+                <th className="pb-3 text-right pr-2 w-24">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -48,20 +71,67 @@ export const IncomeForm = () => {
               ) : (
                 store.incomes.map(i => (
                   <tr key={i.id} className="group hover:bg-slate-50/50 transition-colors">
-                    <td className="py-3 pl-2 font-bold text-slate-700">{i.label}</td>
-                    <td className="py-3 text-center">
-                      <span className={`px-2 py-0.5 rounded-sm text-[9px] font-black uppercase ${
-                        i.frequency === 'monthly' ? 'bg-indigo-50 text-indigo-600' : 
-                        i.frequency === 'yearly' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {i.frequency} {i.targetMonth ? `[${i.targetMonth}]` : ''}
-                      </span>
+                    <td className="py-3 pl-2 font-bold text-slate-700">
+                      {editDraft.id === i.id ? (
+                        <input type="text" className="blueprint-input py-1 px-2 w-full text-[11px] font-bold" value={editDraft.label} onChange={e => setEditDraft({ ...editDraft, label: e.target.value })} />
+                      ) : i.label}
                     </td>
-                    <td className="py-3 text-right font-black text-indigo-600">{formatCurrency(i.amount, store.displayCurrency)}</td>
+                    <td className="py-3 text-center">
+                      {editDraft.id === i.id ? (
+                        <div className="flex flex-col gap-1 items-center">
+                          <select className="blueprint-input py-1 px-2 w-24 text-[9px] font-black" value={editDraft.freq} onChange={e => setEditDraft({ ...editDraft, freq: e.target.value as Frequency })}>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="one-time">One-time</option>
+                          </select>
+                          {(editDraft.freq === 'one-time' || editDraft.freq === 'yearly') && (
+                            <div className="flex items-center bg-white border border-slate-200 rounded-sm overflow-hidden h-7">
+                              <button type="button" onClick={() => {
+                                const [year, month] = editDraft.target.split('-').map(Number);
+                                const date = new Date(year, month - 2, 1);
+                                setEditDraft({ ...editDraft, target: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                              }} className="px-1 hover:bg-slate-50 text-slate-400 h-full flex items-center justify-center border-r border-slate-100">
+                                <span className="material-symbols-outlined text-[12px] font-black">chevron_left</span>
+                              </button>
+                              <span className="text-[9px] font-black font-mono text-slate-700 uppercase px-1">{formatMonth(editDraft.target)}</span>
+                              <button type="button" onClick={() => {
+                                const [year, month] = editDraft.target.split('-').map(Number);
+                                const date = new Date(year, month, 1);
+                                setEditDraft({ ...editDraft, target: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                              }} className="px-1 hover:bg-slate-50 text-slate-400 h-full flex items-center justify-center border-l border-slate-100">
+                                <span className="material-symbols-outlined text-[12px] font-black">chevron_right</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <span className={`px-2 py-0.5 rounded-sm text-[9px] font-black uppercase ${
+                          i.frequency === 'monthly' ? 'bg-indigo-50 text-indigo-600' : 
+                          i.frequency === 'yearly' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {i.frequency} {i.targetMonth ? `[${formatMonth(i.targetMonth)}]` : ''}
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 text-right font-black text-indigo-600">
+                      {editDraft.id === i.id ? (
+                        <input type="number" step="0.01" className="blueprint-input py-1 px-2 w-24 text-[11px] font-black text-right" value={editDraft.amount} onChange={e => setEditDraft({ ...editDraft, amount: e.target.value })} />
+                      ) : formatCurrency(i.amount, store.displayCurrency)}
+                    </td>
                     <td className="py-3 text-right pr-2">
-                      <button onClick={() => store.removeIncome(i.id)} className="text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all">
-                        <span className="material-symbols-outlined text-sm">delete_forever</span>
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        {editDraft.id === i.id ? (
+                          <>
+                            <button onClick={handleSaveEdit} className="text-emerald-600 hover:text-emerald-700 transition-all"><span className="material-symbols-outlined text-sm font-black">check</span></button>
+                            <button onClick={() => setEditDraft({ id: null, label: '', amount: '', freq: 'monthly', target: store.viewMonth })} className="text-slate-400 hover:text-slate-600 transition-all"><span className="material-symbols-outlined text-sm font-black">close</span></button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => setEditDraft({ id: i.id, label: i.label, amount: i.amount.toString(), freq: i.frequency, target: i.targetMonth || store.viewMonth })} className="text-slate-300 hover:text-indigo-600 transition-all"><span className="material-symbols-outlined text-sm">edit_note</span></button>
+                            <button onClick={() => { if (window.confirm(`Are you sure you want to delete income source "${i.label}"?`)) store.removeIncome(i.id); }} className="text-slate-300 hover:text-rose-600 transition-all"><span className="material-symbols-outlined text-sm">delete_forever</span></button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -90,10 +160,10 @@ export const IncomeForm = () => {
             </div>
             <div className="space-y-1.5">
               <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Frequency</label>
-              <select className="blueprint-input w-full font-mono text-[10px] font-black" value={form.freq} onChange={e => setForm({ ...form, freq: e.target.value as any })}>
-                <option value="monthly">MONTHLY</option>
-                <option value="yearly">YEARLY</option>
-                <option value="one-time">ONE-TIME</option>
+              <select className="blueprint-input w-full font-mono text-[10px]" value={form.freq} onChange={e => setForm({ ...form, freq: e.target.value as Frequency })}>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+                <option value="one-time">One-time</option>
               </select>
             </div>
           </div>
@@ -101,13 +171,30 @@ export const IncomeForm = () => {
           {(form.freq === 'one-time' || form.freq === 'yearly') && (
             <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
               <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Target_Month</label>
-              <input required type="month" className="blueprint-input w-full font-mono" value={form.target} onChange={e => setForm({ ...form, target: e.target.value })} />
+              <div className="flex items-center bg-white border border-slate-200 rounded-sm overflow-hidden h-[42px]">
+                <button type="button" onClick={() => {
+                  const [year, month] = form.target.split('-').map(Number);
+                  const date = new Date(year, month - 2, 1);
+                  setForm({ ...form, target: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                }} className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full flex items-center justify-center border-r border-slate-100">
+                  <span className="material-symbols-outlined text-sm font-black">chevron_left</span>
+                </button>
+                <div className="flex-1 text-center">
+                  <span className="text-[11px] font-black font-mono text-slate-700 uppercase">{formatMonth(form.target)}</span>
+                </div>
+                <button type="button" onClick={() => {
+                  const [year, month] = form.target.split('-').map(Number);
+                  const date = new Date(year, month, 1);
+                  setForm({ ...form, target: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                }} className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full flex items-center justify-center border-l border-slate-100">
+                  <span className="material-symbols-outlined text-sm font-black">chevron_right</span>
+                </button>
+              </div>
             </div>
           )}
 
           <button className="blueprint-btn-primary w-full py-3 text-[10px]">+ COMMIT_STREAM</button>
         </form>
-        
         <div className="p-4 bg-white rounded-sm border border-slate-200">
           <p className="text-[9px] text-slate-400 font-mono leading-relaxed uppercase">
             Advice: Set up recurring monthly income for a stable reality check. Use "One-time" for expected bonuses or tax refunds.

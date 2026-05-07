@@ -24,7 +24,7 @@ export const formatCurrency = (amount: number, currency: CurrencyCode) => {
 };
 
 export const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('th-TH', {
+  return new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 1,
   }).format(num);
 };
@@ -32,3 +32,12 @@ export const formatNumber = (num: number) => {
 export const getCurrentMonth = () => {
   return new Date().toISOString().slice(0, 7); // YYYY-MM
 };
+
+export const formatMonth = (monthStr: string) => {
+  if (!monthStr) return '';
+  const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const [year, month] = monthStr.split('-');
+  const monthIndex = parseInt(month) - 1;
+  return `${months[monthIndex]} ${year}`;
+};
+

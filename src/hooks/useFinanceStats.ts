@@ -7,26 +7,35 @@ export const useFinanceStats = () => {
 
   const stats = useMemo(() => {
     const totalAssets = store.assets.reduce((acc, curr) => acc + curr.amount, 0);
-    const monthlyIncome = store.incomes.reduce((acc, curr) => {
-      if (curr.frequency === 'monthly') return acc + curr.amount;
-      if (curr.frequency === 'yearly') return acc + (curr.amount / 12);
-      if (curr.frequency === 'one-time' && curr.targetMonth === viewMonth) return acc + curr.amount;
-      return acc;
-    }, 0);
+
+    const getItemAmount = (item: { frequency: string, amount: number, targetMonth?: string }) => {
+      if (item.frequency === 'monthly') return item.amount;
+      if (!item.targetMonth) return 0;
+      
+      // One-time: Exact match (Year and Month)
+      if (item.frequency === 'one-time') {
+        return item.targetMonth === viewMonth ? item.amount : 0;
+      }
+      
+      // Yearly: Month-only match (String manipulation to compare MM)
+      if (item.frequency === 'yearly') {
+        return item.targetMonth.slice(-2) === viewMonth.slice(-2) ? item.amount : 0;
+      }
+      
+      return 0;
+    };
+
+    const monthlyIncome = store.incomes.reduce((acc, curr) => acc + getItemAmount(curr), 0);
 
     const breakdown = { necessity: 0, want: 0, savings: 0 };
     store.expenses.forEach(e => {
-      let amount = 0;
-      if (e.frequency === 'monthly') amount = e.amount;
-      else if (e.frequency === 'yearly') amount = e.amount / 12;
-      else if (e.frequency === 'one-time' && e.targetMonth === viewMonth) amount = e.amount;
-      breakdown[e.category] += amount;
+      breakdown[e.category] += getItemAmount(e);
     });
 
     const totalReserved = store.goals.reduce((acc, goal) => acc + (goal.savedAmount || 0), 0);
     const availableAssets = totalAssets - totalReserved;
     const monthlyExpenses = breakdown.necessity + breakdown.want + breakdown.savings;
-    const runway = breakdown.necessity > 0 ? totalAssets / breakdown.necessity : (totalAssets > 0 ? Infinity : 0);
+    const runway = breakdown.necessity > 0 ? totalAssets / breakdown.necessity : 0;
 
     const goalProgress = store.goals.map(goal => {
       const asset = store.assets.find(a => a.id === goal.linkedAssetId);

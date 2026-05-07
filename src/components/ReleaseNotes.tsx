@@ -16,6 +16,20 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 8, 2026',
+    isoDate: '2026-05-08',
+    title: 'Precision Finance Engine & Universal Morph UI',
+    changes: [
+      '**Universal Inline Morph UI:** Overhauled all ledgers (Assets, Income, Expenses, Goals) with in-place editing. Rows now "morph" into interactive input fields for rapid data adjustment without context switching.',
+      '**3-Step Gateway Calculation:** Re-engineered the financial math core to handle recurring monthly, exact one-time matches, and month-only yearly cycles with high precision.',
+      '**Embedded Tactical Paginator:** Integrated the month-selection paginator directly into ledger rows for date-sensitive records during the editing phase.',
+      '**Radar Lock Sync Protocol:** Deployed a dynamic sync sensor in the HUD that flags out-of-period browsing in Amber and allows instant re-sync with a single click.',
+      '**Multi-Phase Validation Engine:** Implemented a robust security layer for data entry: The Ghost Trap (empty labels), The NaN Trap (invalid numbers), and The Negative Asset Trap (logical balance enforcement).',
+      '**Zustand Partial Update Engine:** Optimized the state store with surgical update actions (`updateAsset`, `updateIncome`, etc.) for high-performance data mutations.',
+      '**Operational Safety Overhaul:** Implemented global deletion protocols with confirmation safeguards and always-visible destruction triggers.'
+    ]
+  },
+  {
     date: 'May 7, 2026',
     isoDate: '2026-05-07',
     title: 'Tactical Finance Tracker & HUD System Integration',

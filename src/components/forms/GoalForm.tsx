@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { useFinanceStore } from '@/lib/finance-store';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatMonth } from '@/lib/utils';
 
 export const GoalForm = () => {
   const store = useFinanceStore();
   const [form, setForm] = useState({ label: '', target: '', deadline: store.viewMonth, assetId: '' });
+  const [editDraft, setEditDraft] = useState<{ id: string | null, label: string, target: string, deadline: string, assetId: string }>({
+    id: null,
+    label: '',
+    target: '',
+    deadline: store.viewMonth,
+    assetId: ''
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +23,22 @@ export const GoalForm = () => {
       linkedAssetId: form.assetId 
     });
     setForm({ label: '', target: '', deadline: store.viewMonth, assetId: '' });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editDraft.id) return;
+    const cleanLabel = editDraft.label.trim();
+    if (!cleanLabel) return alert("Error: Label cannot be empty.");
+    const parsedAmount = parseFloat(editDraft.target);
+    if (isNaN(parsedAmount)) return alert("Error: Invalid target amount.");
+
+    store.updateGoal(editDraft.id, {
+      label: cleanLabel,
+      targetAmount: parsedAmount,
+      deadline: editDraft.deadline,
+      linkedAssetId: editDraft.assetId
+    });
+    setEditDraft({ id: null, label: '', target: '', deadline: store.viewMonth, assetId: '' });
   };
 
   return (
@@ -38,7 +61,7 @@ export const GoalForm = () => {
                 <th className="pb-3 text-center">Deadline</th>
                 <th className="pb-3 text-center">Source_Asset</th>
                 <th className="pb-3 text-right">Target_Amount</th>
-                <th className="pb-3 text-right pr-2 w-10">Actions</th>
+                <th className="pb-3 text-right pr-2 w-24">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -49,20 +72,69 @@ export const GoalForm = () => {
               ) : (
                 store.goals.map(goal => {
                   const asset = store.assets.find(a => a.id === goal.linkedAssetId);
+                  const draftAsset = store.assets.find(a => a.id === editDraft.assetId);
+
                   return (
                     <tr key={goal.id} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="py-3 pl-2 font-bold text-slate-700">{goal.label}</td>
-                      <td className="py-3 text-center text-slate-500 font-bold uppercase">{goal.deadline}</td>
-                      <td className="py-3 text-center">
-                        <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-sm text-[9px] font-black uppercase">
-                          {asset?.label || 'UNKNOWN_SOURCE'}
-                        </span>
+                      <td className="py-3 pl-2 font-bold text-slate-700">
+                        {editDraft.id === goal.id ? (
+                          <input type="text" className="blueprint-input py-1 px-2 w-full text-[11px] font-bold" value={editDraft.label} onChange={e => setEditDraft({ ...editDraft, label: e.target.value })} />
+                        ) : goal.label}
                       </td>
-                      <td className="py-3 text-right font-black text-indigo-600">{formatCurrency(goal.targetAmount, store.displayCurrency)}</td>
+                      <td className="py-3 text-center">
+                        {editDraft.id === goal.id ? (
+                          <div className="flex items-center bg-white border border-slate-200 rounded-sm overflow-hidden h-7">
+                            <button type="button" onClick={() => {
+                              const [year, month] = editDraft.deadline.split('-').map(Number);
+                              const date = new Date(year, month - 2, 1);
+                              setEditDraft({ ...editDraft, deadline: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                            }} className="px-1 hover:bg-slate-50 text-slate-400 h-full flex items-center justify-center border-r border-slate-100">
+                              <span className="material-symbols-outlined text-[12px] font-black">chevron_left</span>
+                            </button>
+                            <span className="text-[9px] font-black font-mono text-slate-700 uppercase px-1">{formatMonth(editDraft.deadline)}</span>
+                            <button type="button" onClick={() => {
+                              const [year, month] = editDraft.deadline.split('-').map(Number);
+                              const date = new Date(year, month, 1);
+                              setEditDraft({ ...editDraft, deadline: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+                            }} className="px-1 hover:bg-slate-50 text-slate-400 h-full flex items-center justify-center border-l border-slate-100">
+                              <span className="material-symbols-outlined text-[12px] font-black">chevron_right</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 font-bold uppercase">{formatMonth(goal.deadline)}</span>
+                        )}
+                      </td>
+                      <td className="py-3 text-center">
+                        {editDraft.id === goal.id ? (
+                          <select className="blueprint-input py-1 px-2 w-24 text-[9px] font-black" value={editDraft.assetId} onChange={e => setEditDraft({ ...editDraft, assetId: e.target.value })}>
+                            <option value="" disabled>Select account...</option>
+                            {store.assets.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
+                          </select>
+                        ) : (
+                          <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-sm text-[9px] font-black uppercase">
+                            {asset?.label || 'UNKNOWN_SOURCE'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 text-right font-black text-indigo-600">
+                        {editDraft.id === goal.id ? (
+                          <input type="number" step="0.01" className="blueprint-input py-1 px-2 w-24 text-[11px] font-black text-right" value={editDraft.target} onChange={e => setEditDraft({ ...editDraft, target: e.target.value })} />
+                        ) : formatCurrency(goal.targetAmount, store.displayCurrency)}
+                      </td>
                       <td className="py-3 text-right pr-2">
-                        <button onClick={() => store.removeGoal(goal.id)} className="text-slate-300 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-all">
-                          <span className="material-symbols-outlined text-sm">delete_forever</span>
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          {editDraft.id === goal.id ? (
+                            <>
+                              <button onClick={handleSaveEdit} className="text-emerald-600 hover:text-emerald-700 transition-all"><span className="material-symbols-outlined text-sm font-black">check</span></button>
+                              <button onClick={() => setEditDraft({ id: null, label: '', target: '', deadline: store.viewMonth, assetId: '' })} className="text-slate-400 hover:text-slate-600 transition-all"><span className="material-symbols-outlined text-sm font-black">close</span></button>
+                            </>
+                          ) : (
+                            <>
+                              <button onClick={() => setEditDraft({ id: goal.id, label: goal.label, target: goal.targetAmount.toString(), deadline: goal.deadline, assetId: goal.linkedAssetId })} className="text-slate-300 hover:text-indigo-600 transition-all"><span className="material-symbols-outlined text-sm">edit_note</span></button>
+                              <button onClick={() => { if (window.confirm(`Are you sure you want to delete mission "${goal.label}"?`)) store.removeGoal(goal.id); }} className="text-slate-300 hover:text-rose-600 transition-all"><span className="material-symbols-outlined text-sm">delete_forever</span></button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -84,28 +156,41 @@ export const GoalForm = () => {
             <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Mission_Label</label>
             <input required type="text" placeholder="e.g. Melbourne Trip, New PC" className="blueprint-input w-full" value={form.label} onChange={e => setForm({ ...form, label: e.target.value })} />
           </div>
-          
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Target_Value</label>
             <input required type="number" step="0.01" placeholder="0.00" className="blueprint-input w-full font-mono text-center" value={form.target} onChange={e => setForm({ ...form, target: e.target.value })} />
           </div>
-
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Mission_Deadline</label>
-            <input required type="month" className="blueprint-input w-full font-mono" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} />
+            <div className="flex items-center bg-white border border-slate-200 rounded-sm overflow-hidden h-[42px]">
+              <button type="button" onClick={() => {
+                const [year, month] = form.deadline.split('-').map(Number);
+                const date = new Date(year, month - 2, 1);
+                setForm({ ...form, deadline: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+              }} className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full flex items-center justify-center border-r border-slate-100">
+                <span className="material-symbols-outlined text-sm font-black">chevron_left</span>
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-[11px] font-black font-mono text-slate-700 uppercase">{formatMonth(form.deadline)}</span>
+              </div>
+              <button type="button" onClick={() => {
+                const [year, month] = form.deadline.split('-').map(Number);
+                const date = new Date(year, month, 1);
+                setForm({ ...form, deadline: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` });
+              }} className="px-3 hover:bg-slate-50 text-slate-400 transition-colors h-full flex items-center justify-center border-l border-slate-100">
+                <span className="material-symbols-outlined text-sm font-black">chevron_right</span>
+              </button>
+            </div>
           </div>
-
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Linked_Asset_Source</label>
-            <select required className="blueprint-input w-full font-mono text-[10px] font-black" value={form.assetId} onChange={e => setForm({ ...form, assetId: e.target.value })}>
-              <option value="" disabled>SELECT_ACCOUNT...</option>
-              {store.assets.map(a => <option key={a.id} value={a.id}>{a.label.toUpperCase()}</option>)}
+            <select required className="blueprint-input w-full font-mono text-[10px]" value={form.assetId} onChange={e => setForm({ ...form, assetId: e.target.value })}>
+              <option value="" disabled>Select account...</option>
+              {store.assets.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
             </select>
           </div>
-
           <button className="blueprint-btn-primary w-full py-3 text-[10px] tracking-widest">+ EXECUTE_MISSION</button>
         </form>
-        
         <div className="p-4 bg-white rounded-sm border border-slate-200">
           <p className="text-[9px] text-slate-400 font-mono leading-relaxed uppercase">
             Guideline: Every mission must be linked to a physical asset. This ensures you are not "planning" with money that doesn't exist.
