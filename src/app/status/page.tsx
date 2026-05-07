@@ -155,7 +155,7 @@ export default function StatusPage() {
       const region = 'ap-southeast-2';
       const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || 'ap-southeast-2_lzY5nRppB';
       const url = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}/.well-known/openid-configuration`;
-      
+
       const res = await fetch(url, { method: 'GET', cache: 'no-store' });
       if (res.ok) {
         setCognitoStatus('operational');
@@ -235,7 +235,7 @@ export default function StatusPage() {
   useEffect(() => {
     const runAll = async () => {
       await Promise.all([
-        pingTelemetry(), 
+        pingTelemetry(),
         pingCognito(),
         pingCloudfront()
       ]);
@@ -304,122 +304,123 @@ export default function StatusPage() {
 
   return (
     <div className="space-y-8">
-        {/* ── Overall Status Banner ─────────────────────────── */}
-        <div className={`flex items-center gap-3 rounded-sm border p-4 mb-6 backdrop-blur-sm ${overallBannerClasses(overall)}`}>
-          <span className="material-symbols-outlined text-[22px]">{overallBannerIcon(overall)}</span>
-          <div className="flex-1">
-            <p className="font-semibold text-sm font-mono">{overallBannerText(overall)}</p>
-            {lastChecked && (
-              <p className="text-xs opacity-70 mt-0.5 font-mono">
-                Last checked: {lastChecked.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* ── Real-time Status Card ─────────────────────────── */}
-        <div className="card-blueprint p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">Infrastructure Health</h3>
-            <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-sm font-mono font-bold uppercase border border-indigo-200">Live Data</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="text-center">
-              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Latency</p>
-              <p className="text-lg font-mono font-bold text-slate-800">{displayLatency ? `${displayLatency}ms` : '---'}</p>
-            </div>
-            <div className="text-center border-l border-slate-200">
-              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">CDN Cache</p>
-              <p className="text-lg font-mono font-bold text-emerald-600">HIT</p>
-            </div>
-            <div className="text-center border-l border-slate-200">
-              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Security</p>
-              <p className="text-lg font-mono font-bold text-slate-800">TLS 1.3</p>
-            </div>
-            <div className="text-center border-l border-slate-200">
-              <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Region</p>
-              <p className="text-lg font-mono font-bold text-slate-800">SYD</p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Service Groups ─────────────────────────────────── */}
-        <div className="space-y-4">
-          {serviceGroups.map((group) => (
-            <div key={group.title} className="card-blueprint overflow-hidden">
-              {/* Group Header */}
-              <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-200">
-                <span className="material-symbols-outlined text-slate-400 text-[18px]">{group.icon}</span>
-                <h3 className="text-sm font-semibold text-slate-800">{group.title}</h3>
-              </div>
-
-              {/* Service Rows */}
-              <div className="divide-y divide-slate-100">
-                {group.services.map((service) => (
-                  <div
-                    key={service.name}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* 6. Radar ping on operational status dots */}
-                      <span className="relative inline-flex h-2 w-2 shrink-0">
-                        {service.status === 'operational' && (
-                          <span className={`absolute inline-flex h-full w-full rounded-full ${statusPingColor(service.status)} animate-radar-ping`} />
-                        )}
-                        <span className={`relative inline-flex h-2 w-2 rounded-full ${statusDotColor(service.status)}`} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm text-slate-800 font-medium truncate">{service.name}</p>
-                        {service.detail && (
-                          <p className="text-xs text-slate-400 font-mono truncate">{service.detail}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-4">
-                      {service.latency !== undefined && (
-                        <span className="text-xs text-slate-400 font-mono">{service.latency}ms</span>
-                      )}
-                      <span className={statusBadge(service.status)}>{statusLabel(service.status)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Raw Payload Drawer ──────────────────────────────── */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowRaw(!showRaw)}
-            className="flex items-center gap-2 px-4 py-2.5 card-blueprint text-sm text-slate-600 hover:border-indigo-300 hover:text-slate-900 transition-colors w-full"
-          >
-            <span className="font-mono font-bold text-slate-800">{`{ }`}</span>
-            <span className="font-medium">View Raw API Payloads</span>
-            <span className="material-symbols-outlined text-[18px] ml-auto transition-transform" style={{ transform: showRaw ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-              expand_more
-            </span>
-          </button>
-
-          {showRaw && (
-            <div className="mt-2 card-blueprint overflow-hidden">
-              <div className="p-4 overflow-auto max-h-[60vh]">
-                <pre className="text-slate-700 font-mono text-[12px] leading-relaxed whitespace-pre-wrap">
-                  {JSON.stringify(rawPayloads, null, 2)}
-                </pre>
-              </div>
-            </div>
+      {/* ── Overall Status Banner ─────────────────────────── */}
+      <div className={`flex items-center gap-3 rounded-sm border p-4 mb-6 backdrop-blur-sm ${overallBannerClasses(overall)}`}>
+        <span className="material-symbols-outlined text-[22px]">{overallBannerIcon(overall)}</span>
+        <div className="flex-1">
+          <p className="font-semibold text-sm font-mono">{overallBannerText(overall)}</p>
+          {lastChecked && (
+            <p className="text-xs opacity-70 mt-0.5 font-mono">
+              Last checked: {lastChecked.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
           )}
         </div>
+      </div>
 
-        <div className="mt-8 mb-4 text-center">
-          <p className="text-xs text-slate-400 font-mono">
-            Powered by AWS Lambda, API Gateway, DynamoDB, and CloudFront.
-          </p>
-          <p className="text-xs text-slate-400 mt-1 font-mono">
-            Region: ap-southeast-2 | Edge: BKK
-          </p>
+      {/* ── Real-time Status Card ─────────────────────────── */}
+      <div className="card-blueprint p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest font-mono">Infrastructure Health</h3>
+          <span className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-sm font-mono font-bold uppercase border border-indigo-200">Live Data</span>
         </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="text-center">
+            <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Latency</p>
+            <p className="text-lg font-mono font-bold text-slate-800">{displayLatency ? `${displayLatency}ms` : '---'}</p>
+          </div>
+          <div className="text-center border-l border-slate-200">
+            <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">CDN Cache</p>
+            <p className="text-lg font-mono font-bold text-emerald-600">HIT</p>
+          </div>
+          <div className="text-center border-l border-slate-200">
+            <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Security</p>
+            <p className="text-lg font-mono font-bold text-slate-800">TLS 1.3</p>
+          </div>
+          <div className="text-center border-l border-slate-200">
+            <p className="text-[10px] text-slate-400 uppercase font-bold mb-1 font-mono">Region</p>
+            <p className="text-lg font-mono font-bold text-slate-800">SYD</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Service Groups ─────────────────────────────────── */}
+      <div className="space-y-4">
+        {serviceGroups.map((group) => (
+          <div key={group.title} className="card-blueprint overflow-hidden">
+            {/* Group Header */}
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-200">
+              <span className="material-symbols-outlined text-slate-400 text-[18px]">{group.icon}</span>
+              <h3 className="text-sm font-semibold text-slate-800">{group.title}</h3>
+            </div>
+
+            {/* Service Rows */}
+            <div className="divide-y divide-slate-100">
+              {group.services.map((service) => (
+                <div
+                  key={service.name}
+                  className="flex items-center justify-between px-5 py-3 hover:bg-slate-50/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* 6. Radar ping on operational status dots */}
+                    <span className="relative inline-flex h-2 w-2 shrink-0">
+                      {service.status === 'operational' && (
+                        <span className={`absolute inline-flex h-full w-full rounded-full ${statusPingColor(service.status)} animate-radar-ping`} />
+                      )}
+                      <span className={`relative inline-flex h-2 w-2 rounded-full ${statusDotColor(service.status)}`} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-800 font-medium truncate">{service.name}</p>
+                      {service.detail && (
+                        <p className="text-xs text-slate-400 font-mono truncate">{service.detail}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    {service.latency !== undefined && (
+                      <span className="text-xs text-slate-400 font-mono">{service.latency}ms</span>
+                    )}
+                    <span className={statusBadge(service.status)}>{statusLabel(service.status)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Raw Payload Drawer ──────────────────────────────── */}
+      <div className="mt-6">
+        <button
+          onClick={() => setShowRaw(!showRaw)}
+          className="flex items-center gap-2 px-4 py-2.5 card-blueprint text-sm text-slate-600 hover:border-indigo-300 hover:text-slate-900 transition-colors w-full"
+        >
+          <span className="font-mono font-bold text-slate-800">{`{ }`}</span>
+          <span className="font-medium">View Raw API Payloads</span>
+          <span className="material-symbols-outlined text-[18px] ml-auto transition-transform" style={{ transform: showRaw ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+            expand_more
+          </span>
+        </button>
+
+        {showRaw && (
+          <div className="mt-2 card-blueprint overflow-hidden">
+            <div className="p-4 overflow-auto max-h-[60vh]">
+              <pre className="text-slate-700 font-mono text-[12px] leading-relaxed whitespace-pre-wrap">
+                {JSON.stringify(rawPayloads, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Footer ──────────────────────────────────────────── */}
+      <div className="mt-8 mb-4 text-center">
+        <p className="text-xs text-slate-400 font-mono">
+          Powered by AWS Lambda, API Gateway, DynamoDB, and CloudFront.
+        </p>
+        <p className="text-xs text-slate-400 mt-1 font-mono">
+          Region: ap-southeast-2 | Edge: BKK
+        </p>
+      </div>
     </div>
   );
 }
