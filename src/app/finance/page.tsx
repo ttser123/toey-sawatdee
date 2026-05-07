@@ -38,8 +38,8 @@ export default function FinancePage() {
             <button
               key={tab}
               onClick={() => setRecordTab(tab)}
-              className={`px-4 py-2 text-[10px] font-black font-mono uppercase tracking-widest border transition-all ${recordTab === tab
-                  ? 'bg-slate-800 text-white border-slate-900'
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[9px] sm:text-[10px] font-black font-mono uppercase tracking-widest border transition-all ${recordTab === tab
+                  ? 'bg-slate-800 text-white border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.3)]'
                   : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                 }`}
             >
@@ -57,7 +57,7 @@ export default function FinancePage() {
   return (
     <div className="space-y-8">
       {/* MODE SWITCHER */}
-      <nav className="flex gap-1 border-b border-slate-200 pb-4">
+      <nav className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
         {[
           { id: 'reality_check', label: 'Reality_Check', icon: 'radar' },
           { id: 'input_buffer', label: 'Input_Buffer', icon: 'settings_input_component' }
@@ -65,13 +65,13 @@ export default function FinancePage() {
           <button
             key={mode.id}
             onClick={() => setActiveMode(mode.id as any)}
-            className={`flex items-center gap-2 px-6 py-2.5 text-[11px] font-black font-mono uppercase tracking-widest transition-all border ${activeMode === mode.id
+            className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 sm:px-6 py-2.5 text-[10px] sm:text-[11px] font-black font-mono uppercase tracking-widest transition-all border ${activeMode === mode.id
                 ? 'bg-indigo-600 text-white border-indigo-700 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.3)]'
                 : 'bg-white/50 text-slate-500 border-slate-300 hover:bg-slate-100'
               }`}
           >
             <span className="material-symbols-outlined text-sm">{mode.icon}</span>
-            [{mode.label}]
+            <span className="whitespace-nowrap">[{mode.label}]</span>
           </button>
         ))}
       </nav>

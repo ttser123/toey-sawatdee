@@ -155,10 +155,10 @@ export default function ReleaseNotes() {
       <div className="card-blueprint p-6 md:p-8">
         <div className="space-y-8">
           {releaseNotes.map((note, index) => {
-            {/* Fix #2: Derive isLatest from position — first item is always latest */}
+            {/* Fix #2: Derive isLatest from position — first item is always latest */ }
             const isLatest = index === 0;
             const isLast = index === releaseNotes.length - 1;
-            {/* Stable key from date + title (unique per release) */}
+            {/* Stable key from date + title (unique per release) */ }
             const noteKey = `${note.isoDate}-${note.title}`;
 
             return (

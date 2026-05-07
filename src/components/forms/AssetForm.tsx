@@ -48,19 +48,19 @@ export const AssetForm = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
       {/* 70% LEDGER */}
-      <div className="w-full lg:w-[70%] card-blueprint p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase text-sm font-mono">
+      <div className="w-full lg:w-[70%] card-blueprint p-4 sm:p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase text-xs sm:text-sm font-mono">
             <span className="material-symbols-outlined bg-slate-100 p-1.5 text-slate-600 rounded-sm text-lg">database</span>
             Asset_Ledger // Current_Inventory
           </h3>
-          <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Total_Entries: {store.assets.length}</span>
+          <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase font-mono">Total_Entries: {store.assets.length}</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left font-mono text-[11px]">
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <table className="w-full text-left font-mono text-[10px] sm:text-[11px] min-w-[400px]">
             <thead>
               <tr className="text-slate-400 uppercase border-b border-slate-100">
                 <th className="pb-3 pl-2">Asset_Label</th>
@@ -71,7 +71,7 @@ export const AssetForm = () => {
             <tbody className="divide-y divide-slate-50">
               {store.assets.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="py-8 text-center text-slate-400 uppercase italic">Ledger_Empty // Waiting_for_Data</td>
+                  <td colSpan={3} className="py-8 text-center text-slate-400 uppercase italic text-[9px] sm:text-[11px]">Ledger_Empty // Waiting_for_Data</td>
                 </tr>
               ) : (
                 store.assets.map(a => (
@@ -80,7 +80,7 @@ export const AssetForm = () => {
                       {editDraft.id === a.id ? (
                         <input 
                           type="text" 
-                          className="blueprint-input py-1 px-2 w-full text-[11px] font-bold" 
+                          className="blueprint-input py-1 px-2 w-full text-[10px] sm:text-[11px] font-bold" 
                           value={editDraft.label} 
                           onChange={e => setEditDraft({ ...editDraft, label: e.target.value })} 
                         />
@@ -93,7 +93,7 @@ export const AssetForm = () => {
                         <input 
                           type="number" 
                           step="0.01"
-                          className="blueprint-input py-1 px-2 w-32 text-[11px] font-black text-right" 
+                          className="blueprint-input py-1 px-2 w-28 sm:w-32 text-[10px] sm:text-[11px] font-black text-right" 
                           value={editDraft.amount} 
                           onChange={e => setEditDraft({ ...editDraft, amount: e.target.value })} 
                         />
@@ -102,7 +102,7 @@ export const AssetForm = () => {
                       )}
                     </td>
                     <td className="py-3 text-right pr-2">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-2 sm:gap-3">
                         {editDraft.id === a.id ? (
                           <>
                             <button 
@@ -127,7 +127,7 @@ export const AssetForm = () => {
                               className="text-slate-300 hover:text-indigo-600 transition-all"
                               title="Edit Asset"
                             >
-                              <span className="material-symbols-outlined text-sm">edit_note</span>
+                              <span className="material-symbols-outlined text-sm sm:text-base">edit_note</span>
                             </button>
                             <button 
                               onClick={() => {
@@ -136,8 +136,9 @@ export const AssetForm = () => {
                                 }
                               }} 
                               className="text-slate-300 hover:text-rose-600 transition-all"
+                              title="Delete Asset"
                             >
-                              <span className="material-symbols-outlined text-sm">delete_forever</span>
+                              <span className="material-symbols-outlined text-sm sm:text-base">delete_forever</span>
                             </button>
                           </>
                         )}
@@ -152,40 +153,40 @@ export const AssetForm = () => {
       </div>
 
       {/* 30% ADD FORM */}
-      <div className="w-full lg:w-[30%] card-blueprint p-6 space-y-6 bg-slate-50/50 border-dashed">
-        <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase text-xs font-mono">
+      <div className="w-full lg:w-[30%] card-blueprint p-4 sm:p-6 space-y-6 bg-slate-50/50 border-dashed">
+        <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase text-[10px] sm:text-xs font-mono">
           <span className="material-symbols-outlined text-sm">add_box</span>
           Initialize_New_Asset
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Asset_Name</label>
+            <label className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase ml-1">Asset_Name</label>
             <input 
               required 
               type="text" 
               placeholder="e.g. Main Bank Account" 
-              className="blueprint-input w-full" 
+              className="blueprint-input w-full text-xs" 
               value={form.label} 
               onChange={e => setForm({ ...form, label: e.target.value })} 
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-slate-400 uppercase ml-1">Initial_Balance</label>
+            <label className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase ml-1">Initial_Balance</label>
             <input 
               required 
               type="number" 
               step="0.01" 
               placeholder="0.00" 
-              className="blueprint-input w-full font-mono" 
+              className="blueprint-input w-full font-mono text-xs" 
               value={form.amount} 
               onChange={e => setForm({ ...form, amount: e.target.value })} 
             />
           </div>
-          <button className="blueprint-btn-primary w-full py-3 text-[10px] tracking-widest">+ COMMIT_TO_LEDGER</button>
+          <button className="blueprint-btn-primary w-full py-3 text-[9px] sm:text-[10px] tracking-widest">+ COMMIT_TO_LEDGER</button>
         </form>
         
-        <div className="p-4 bg-white rounded-sm border border-slate-200">
-          <p className="text-[9px] text-slate-400 font-mono leading-relaxed uppercase">
+        <div className="p-3 sm:p-4 bg-white rounded-sm border border-slate-200">
+          <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono leading-relaxed uppercase">
             Notice: Assets represent liquid or semi-liquid funds that can be allocated to goals or used for survival runway.
           </p>
         </div>
