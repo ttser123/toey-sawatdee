@@ -16,6 +16,20 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 7, 2026',
+    isoDate: '2026-05-07',
+    title: 'Tactical Finance Tracker & HUD System Integration',
+    changes: [
+      '**The Vault (Zustand Store):** Implemented a high-performance finance engine with LocalStorage persistence and data versioning (V1) for long-term data integrity.',
+      '**Financial Math Engine:** Engineered real-time calculation logic for the 50/30/20 rule, Emergency Runways, and automated Sinking Fund distributions.',
+      '**S.M.A.R.T Goal Architecture:** Launched a goal-tracking system with "Lock-in" fund allocation, preventing double-counting of liquid assets and enforcing financial discipline.',
+      '**Tactical HUD Header:** Deployed a dynamic `HudHeader` system across all routes, providing contextual titles and navigational orientation.',
+      '**Multi-Currency Protocol:** Integrated full support for THB, AUD, USD, and EUR, localized via `Intl.NumberFormat`.',
+      '**Administrative Structural Refactor:** Migrated game server dashboards to a secure `/admin` scope and optimized sidebar navigation for authenticated sessions.',
+      '**Hydration & Reliability:** Eliminated flickering in stateful dashboard components by implementing a deterministic hydration strategy for persistent store data.'
+    ]
+  },
+  {
     date: 'May 5, 2026',
     isoDate: '2026-05-05',
     title: 'Blueprint Design System & Technical Aesthetics Overhaul',
@@ -124,15 +138,6 @@ const renderText = (text: string) => {
 export default function ReleaseNotes() {
   return (
     <>
-      {/* Changelog & Release Notes Section */}
-      <div className="mb-6 flex items-center gap-3 px-1 mt-0">
-        <span className="material-symbols-outlined text-slate-400 text-[28px]">update</span>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">Release Notes</h2>
-          <p className="text-sm text-slate-500 mt-1">Track recent updates, feature rollouts, and infrastructure changes.</p>
-        </div>
-      </div>
-
       <div className="card-blueprint p-6 md:p-8">
         <div className="space-y-8">
           {releaseNotes.map((note, index) => {

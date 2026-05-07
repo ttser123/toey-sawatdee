@@ -23,16 +23,17 @@ interface GameZone {
 }
 
 const gameServerItems: GameZone[] = [
-  { href: '/games-server/zomboid', label: 'Project Zomboid', },
-  { href: '/games-server/minecraft', label: 'Minecraft' },
+  { href: '/admin/games-server/zomboid', label: 'Project Zomboid', },
+  { href: '/admin/games-server/minecraft', label: 'Minecraft' },
   // ── Add more game servers / zones here ──
-  // { href: '/games-server/valheim', icon: 'shield', label: 'Valheim', zone: 'EU-W1' },
+  // { href: '/admin/games-server/valheim', icon: 'shield', label: 'Valheim', zone: 'EU-W1' },
 ];
 
 /** Bottom simple links */
 const bottomNav = [
   { href: '/status', icon: 'monitor_heart', label: 'Status' },
   { href: '/release-notes', icon: 'update', label: 'Release Notes' },
+  { href: '/finance', icon: 'account_balance', label: 'Finance[Test]' },
 ];
 
 const adminNav = [
@@ -263,68 +264,6 @@ export default function Sidebar() {
             <NavItem key={item.href} {...item} />
           ))}
 
-          {/* ── Games Server Dropdown ─────────────────────────── */}
-          <div>
-            {/* Fix #3: aria-expanded + aria-controls for A11y */}
-            <button
-              onClick={() => {
-                if (!isOpen) {
-                  // Sidebar is collapsed — expand it first, then open dropdown
-                  setIsOpen(true);
-                  setTimeout(() => setGamesOpen(true), 300);
-                } else {
-                  setGamesOpen(!gamesOpen);
-                }
-              }}
-              title={!isOpen ? 'Games Server' : undefined}
-              aria-expanded={gamesOpen}
-              aria-controls={GAMES_DROPDOWN_ID}
-              className={`w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-colors ${isGameRouteActive
-                ? 'bg-indigo-50/60 text-indigo-600'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
-                }`}
-            >
-              <span className={`material-symbols-outlined text-lg shrink-0 ${isGameRouteActive ? 'text-indigo-500' : ''}`}>
-                sports_esports
-              </span>
-              <span className={`whitespace-nowrap flex-1 text-left block ${isOpen ? 'md:block' : 'md:hidden'}`}>
-                Games Server
-              </span>
-              {/* Chevron indicator — hidden when sidebar is collapsed */}
-              {isOpen && (
-                <span
-                  className={`material-symbols-outlined text-[16px] shrink-0 transition-transform duration-300 ${gamesOpen ? 'rotate-180' : 'rotate-0'
-                    } ${isGameRouteActive ? 'text-indigo-400' : 'text-slate-400'}`}
-                >
-                  expand_more
-                </span>
-              )}
-              {/* Active dot badge (visible when sidebar is collapsed) */}
-              {isGameRouteActive && (
-                <span className={`absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 ${isOpen ? 'md:hidden' : 'md:block'} hidden`} />
-              )}
-            </button>
-
-            {/* ── Fix #2: CSS Grid animation instead of hardcoded pixels ── */}
-            <div
-              id={GAMES_DROPDOWN_ID}
-              role="region"
-              className="grid transition-all duration-300 ease-in-out"
-              style={{
-                gridTemplateRows: gamesOpen ? '1fr' : '0fr',
-                opacity: gamesOpen ? 1 : 0,
-              }}
-            >
-              <div className="overflow-hidden">
-                <div className="pt-1 pb-1 space-y-0.5">
-                  {gameServerItems.map((item) => (
-                    <GameNavItem key={item.href} {...item} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Bottom navigation items */}
           {bottomNav.map((item) => (
             <NavItem key={item.href} {...item} />
@@ -340,6 +279,68 @@ export default function Sidebar() {
               {adminNav.map((item) => (
                 <NavItem key={item.href} {...item} />
               ))}
+
+              {/* ── Games Server Dropdown ─────────────────────────── */}
+              <div className="mt-1">
+                {/* Fix #3: aria-expanded + aria-controls for A11y */}
+                <button
+                  onClick={() => {
+                    if (!isOpen) {
+                      // Sidebar is collapsed — expand it first, then open dropdown
+                      setIsOpen(true);
+                      setTimeout(() => setGamesOpen(true), 300);
+                    } else {
+                      setGamesOpen(!gamesOpen);
+                    }
+                  }}
+                  title={!isOpen ? 'Games Server' : undefined}
+                  aria-expanded={gamesOpen}
+                  aria-controls={GAMES_DROPDOWN_ID}
+                  className={`w-full group relative flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-colors ${isGameRouteActive
+                    ? 'bg-indigo-50/60 text-indigo-600'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+                    }`}
+                >
+                  <span className={`material-symbols-outlined text-lg shrink-0 ${isGameRouteActive ? 'text-indigo-500' : ''}`}>
+                    sports_esports
+                  </span>
+                  <span className={`whitespace-nowrap flex-1 text-left block ${isOpen ? 'md:block' : 'md:hidden'}`}>
+                    Games Server
+                  </span>
+                  {/* Chevron indicator — hidden when sidebar is collapsed */}
+                  {isOpen && (
+                    <span
+                      className={`material-symbols-outlined text-[16px] shrink-0 transition-transform duration-300 ${gamesOpen ? 'rotate-180' : 'rotate-0'
+                        } ${isGameRouteActive ? 'text-indigo-400' : 'text-slate-400'}`}
+                    >
+                      expand_more
+                    </span>
+                  )}
+                  {/* Active dot badge (visible when sidebar is collapsed) */}
+                  {isGameRouteActive && (
+                    <span className={`absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-indigo-500 ${isOpen ? 'md:hidden' : 'md:block'} hidden`} />
+                  )}
+                </button>
+
+                {/* ── Fix #2: CSS Grid animation instead of hardcoded pixels ── */}
+                <div
+                  id={GAMES_DROPDOWN_ID}
+                  role="region"
+                  className="grid transition-all duration-300 ease-in-out"
+                  style={{
+                    gridTemplateRows: gamesOpen ? '1fr' : '0fr',
+                    opacity: gamesOpen ? 1 : 0,
+                  }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="pt-1 pb-1 space-y-0.5">
+                      {gameServerItems.map((item) => (
+                        <GameNavItem key={item.href} {...item} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </nav>

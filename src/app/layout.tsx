@@ -7,8 +7,8 @@ import ClientLayout from '@/components/ClientLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Toey Sawatdee | Infrastructure',
-    description: 'Cloud Infrastructure & Server Status by Toey Sawatdee',
+    title: 'Toey Sawatdee',
+    description: 'Cloud Infrastructure by Toey Sawatdee',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -3,14 +3,9 @@
 
 export default function Home() {
   return (
-    <main className="flex-1 overflow-auto bg-blueprint p-6 md:p-8 lg:p-10">
-      {/* Architecture */}
-      <div className="mb-6 flex items-center gap-3 px-1">
-        <span className="material-symbols-outlined text-indigo-600 text-[20px] mt-0.5">code</span>
-        <h2 className="text-xl font-bold text-slate-800">Web Architecture</h2>
-      </div>
+    <div className="space-y-8">
       {/* Header Section */}
-      <div className="card-blueprint p-6 md:p-8 mb-8">
+      <div className="card-blueprint p-6 md:p-8">
         <div className="flex items-start gap-2.5 text-slate-600">
           <span className="leading-relaxed"><strong className="text-slate-800 font-medium">Tech Stack:</strong> <span className="font-mono text-sm">Next.js (App Router), TypeScript, Tailwind CSS, Python, Node.js, AWS (S3, CloudFront, Route 53, ACM, Cognito, API Gateway, Lambda, DynamoDB), GitHub Actions</span></span>
         </div>
@@ -87,7 +82,6 @@ export default function Home() {
         </div>
 
       </div>
-
-    </main>
+    </div>
   );
 }

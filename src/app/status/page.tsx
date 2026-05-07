@@ -303,20 +303,7 @@ export default function StatusPage() {
   const overall = overallStatus(serviceGroups);
 
   return (
-    <main className="flex-1 overflow-auto bg-blueprint p-6 md:p-8 lg:p-10">
-      <div className="max-w-3xl mx-auto">
-
-        {/* ── Header ────────────────────────────────────────── */}
-        <div className="mb-6 flex items-center gap-3 px-1">
-          <span className="material-symbols-outlined text-slate-400 text-[28px]">monitor_heart</span>
-          <div>
-            <h1 className="text-xl font-bold text-slate-800">System Status</h1>
-            <p className="text-sm text-slate-500 mt-0.5">
-              Real-time infrastructure health for <span className="font-mono text-indigo-600">toey-sawatdee.com</span>
-            </p>
-          </div>
-        </div>
-
+    <div className="space-y-8">
         {/* ── Overall Status Banner ─────────────────────────── */}
         <div className={`flex items-center gap-3 rounded-sm border p-4 mb-6 backdrop-blur-sm ${overallBannerClasses(overall)}`}>
           <span className="material-symbols-outlined text-[22px]">{overallBannerIcon(overall)}</span>
@@ -425,7 +412,6 @@ export default function StatusPage() {
           )}
         </div>
 
-        {/* ── Footer ──────────────────────────────────────────── */}
         <div className="mt-8 mb-4 text-center">
           <p className="text-xs text-slate-400 font-mono">
             Powered by AWS Lambda, API Gateway, DynamoDB, and CloudFront.
@@ -434,8 +420,6 @@ export default function StatusPage() {
             Region: ap-southeast-2 | Edge: BKK
           </p>
         </div>
-
-      </div>
-    </main>
+    </div>
   );
 }
