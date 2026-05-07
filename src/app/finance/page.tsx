@@ -59,8 +59,8 @@ export default function FinancePage() {
       {/* MODE SWITCHER */}
       <nav className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
         {[
-          { id: 'reality_check', label: 'Reality_Check', icon: 'radar' },
-          { id: 'input_buffer', label: 'Input_Buffer', icon: 'settings_input_component' }
+          { id: 'reality_check', label: 'Reality Check', icon: 'radar' },
+          { id: 'input_buffer', label: 'Input Buffer', icon: 'settings_input_component' }
         ].map(mode => (
           <button
             key={mode.id}
@@ -104,7 +104,7 @@ export default function FinancePage() {
 
       <footer className="pt-12 border-t border-slate-200">
         <p className="text-[10px] text-slate-400 font-mono uppercase tracking-[0.2em] leading-relaxed text-center">
-          Tactical_Financial_Interface // Ver_2.4.0 // System_Ready
+          Tactical Financial Interface // Ver 2.4.0 // System Ready
         </p>
       </footer>
     </div>

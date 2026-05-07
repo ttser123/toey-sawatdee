@@ -14,7 +14,7 @@ interface HudHeaderProps {
 
 export default function HudHeader({
   title,
-  subtitle = 'System_Active // Data_Synced',
+  subtitle = 'System Active // Data Synced',
   statusLabel = 'ONLINE',
   children
 }: HudHeaderProps) {
@@ -46,19 +46,21 @@ export default function HudHeader({
       <div className="flex flex-wrap items-center gap-2 md:gap-4">
         {isFinancePage && (
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <div className="flex flex-1 sm:flex-initial items-center gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-sm border border-slate-300">
-              <span className="text-[10px] font-bold text-slate-400 uppercase font-mono whitespace-nowrap">Currency:</span>
-              <select
-                className="text-xs md:text-sm font-bold outline-none border-none bg-transparent font-mono cursor-pointer flex-1"
-                value={store.displayCurrency}
-                onChange={(e) => store.setDisplayCurrency(e.target.value as CurrencyCode)}
-              >
-                {['THB', 'AUD', 'USD', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+            <div className="flex flex-1 sm:flex-initial items-center gap-2 bg-white/70 backdrop-blur-sm p-2 rounded-sm border border-slate-300 sm:min-w-[140px] md:min-w-[160px] h-[52px]">
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-slate-400 uppercase font-mono whitespace-nowrap leading-none mb-1">Currency</span>
+                <select
+                  className="text-xs md:text-sm font-black outline-none border-none bg-transparent font-mono cursor-pointer flex-1 leading-none"
+                  value={store.displayCurrency}
+                  onChange={(e) => store.setDisplayCurrency(e.target.value as CurrencyCode)}
+                >
+                  {['THB', 'AUD', 'USD', 'EUR'].map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
 
             {/* TACTICAL PAGINATOR */}
-            <div className="flex flex-1 sm:flex-initial items-center bg-white/70 backdrop-blur-sm p-1 rounded-sm border border-slate-300">
+            <div className="flex flex-1 sm:flex-initial items-center bg-white/70 backdrop-blur-sm p-1 rounded-sm border border-slate-300 sm:min-w-[180px] md:min-w-[200px] h-[52px]">
               <button 
                 onClick={() => handleMonthChange(-1)}
                 className="p-1.5 hover:bg-slate-100 rounded-sm text-slate-500 transition-colors flex items-center justify-center"
@@ -66,8 +68,8 @@ export default function HudHeader({
                 <span className="material-symbols-outlined text-sm font-black">chevron_left</span>
               </button>
 
-              <div className="px-2 md:px-4 text-center min-w-[90px] md:min-w-[110px]">
-                <span className="text-[9px] font-black text-slate-400 block uppercase tracking-[0.2em] leading-none mb-1">View_Period</span>
+              <div className="px-2 md:px-4 text-center flex-1">
+                <span className="text-[9px] font-black text-slate-400 block uppercase tracking-[0.2em] leading-none mb-1">View Period</span>
                 <span 
                   onClick={() => !isSynced && store.setViewMonth(getCurrentMonth())}
                   className={`text-xs md:text-sm font-black font-mono uppercase leading-none block transition-all ${

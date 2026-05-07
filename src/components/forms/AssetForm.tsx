@@ -171,7 +171,7 @@ export const AssetForm = () => {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase ml-1">Initial_Balance</label>
+            <label className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase ml-1">Initial Balance</label>
             <input 
               required 
               type="number" 
@@ -182,7 +182,7 @@ export const AssetForm = () => {
               onChange={e => setForm({ ...form, amount: e.target.value })} 
             />
           </div>
-          <button className="blueprint-btn-primary w-full py-3 text-[9px] sm:text-[10px] tracking-widest">+ COMMIT_TO_LEDGER</button>
+          <button className="blueprint-btn-primary w-full py-3 text-[9px] sm:text-[10px] tracking-widest">+ COMMIT TO LEDGER</button>
         </form>
         
         <div className="p-3 sm:p-4 bg-white rounded-sm border border-slate-200">

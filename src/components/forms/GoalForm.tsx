@@ -67,7 +67,7 @@ export const GoalForm = () => {
             <tbody className="divide-y divide-slate-50">
               {store.goals.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 uppercase italic text-[9px] sm:text-[11px]">Ledger_Empty // Mission_Status_Idle</td>
+                  <td colSpan={5} className="py-8 text-center text-slate-400 uppercase italic text-[9px] sm:text-[11px]">Ledger Empty // Mission Status Idle</td>
                 </tr>
               ) : (
                 store.goals.map(goal => {

@@ -193,7 +193,7 @@ export const IncomeForm = () => {
             </div>
           )}
 
-          <button className="blueprint-btn-primary w-full py-3 text-[9px] sm:text-[10px] tracking-widest">+ COMMIT_STREAM</button>
+          <button className="blueprint-btn-primary w-full py-3 text-[9px] sm:text-[10px] tracking-widest">+ COMMIT STREAM</button>
         </form>
         <div className="p-3 sm:p-4 bg-white rounded-sm border border-slate-200">
           <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono leading-relaxed uppercase">

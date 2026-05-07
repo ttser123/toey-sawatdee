@@ -109,21 +109,21 @@ export const GoalTracker = ({ onAddMission }: { onAddMission?: () => void }) => 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-indigo-600 bg-indigo-50 p-2 rounded-sm text-lg sm:text-xl">target</span>
-          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">Active_Missions</h2>
+          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">Active Missions</h2>
         </div>
       </div>
 
       <div className="space-y-6 sm:space-y-8 max-h-[500px] sm:max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
         {stats.goalProgress.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-8">
-            <EmptyState icon="flag" message="NO_ACTIVE_MISSIONS // STATUS_IDLE" />
+            <EmptyState icon="flag" message="NO ACTIVE MISSIONS // STATUS IDLE" />
             {onAddMission && (
               <button
                 onClick={onAddMission}
                 className="blueprint-btn-primary px-4 sm:px-8 py-3 flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">add_circle</span>
-                INITIALIZE_MISSION
+                INITIALIZE MISSION
               </button>
             )}
           </div>
@@ -141,7 +141,7 @@ export const GoalTracker = ({ onAddMission }: { onAddMission?: () => void }) => 
 
       <div className="pt-4 border-t border-slate-200">
         <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono uppercase tracking-widest text-center italic">
-          Funds_Movement_Only // Internal_Ledger_Authorized
+          Funds Movement Only // Internal Ledger Authorized
         </p>
       </div>
     </section>

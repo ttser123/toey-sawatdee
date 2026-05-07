@@ -223,7 +223,7 @@ export const ExpenseForm = () => {
         </form>
         <div className="p-3 sm:p-4 bg-white rounded-sm border border-slate-200">
           <p className="text-[8px] sm:text-[9px] text-slate-400 font-mono leading-relaxed uppercase">
-            Rule_50_30_20: Be honest with classifications. Necessities are non-negotiable. Wants are targets for optimization.
+            Rule 50 30 20: Be honest with classifications. Necessities are non-negotiable. Wants are targets for optimization.
           </p>
         </div>
       </div>

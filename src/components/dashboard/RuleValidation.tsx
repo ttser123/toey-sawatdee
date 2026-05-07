@@ -12,29 +12,29 @@ export const RuleValidation = () => {
   const saveP = getPercentage(stats.breakdown.savings);
 
   const rules = [
-    { 
-      label: 'NECESSITIES (50%)', 
-      val: necP, 
+    {
+      label: 'NEEDS (50%)',
+      val: necP,
       amount: stats.breakdown.necessity,
-      max: 50, 
-      color: necP > 50 ? 'rose' : 'slate', 
-      desc: 'Survival_Protocol // Housing_Bills_Food' 
+      max: 50,
+      color: necP > 50 ? 'rose' : 'slate',
+      desc: 'Survival Protocol // Housing Bills Food'
     },
-    { 
-      label: 'WANTS (30%)', 
-      val: wantP, 
+    {
+      label: 'WANTS (30%)',
+      val: wantP,
       amount: stats.breakdown.want,
-      max: 30, 
-      color: wantP > 30 ? 'rose' : 'indigo', 
-      desc: 'Lifestyle_Buffer // Hobbies_Joy' 
+      max: 30,
+      color: wantP > 30 ? 'rose' : 'indigo',
+      desc: 'Lifestyle Buffer // Hobbies Joy'
     },
-    { 
-      label: 'SAVINGS (20%)', 
-      val: saveP, 
+    {
+      label: 'SAVINGS (20%)',
+      val: saveP,
       amount: stats.breakdown.savings,
-      min: 20, 
-      color: saveP < 20 ? 'amber' : 'emerald', 
-      desc: 'Wealth_Accumulation // Investments_Debt' 
+      min: 20,
+      color: saveP < 20 ? 'amber' : 'emerald',
+      desc: 'Wealth Accumulation // Investments Debt'
     }
   ];
 
@@ -43,10 +43,10 @@ export const RuleValidation = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-slate-800">
           <span className="material-symbols-outlined bg-slate-100 p-2 text-slate-600 rounded-sm">analytics</span>
-          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">50_30_20_Protocol</h2>
+          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">50 30 20 Protocol</h2>
         </div>
         <div className="sm:text-right">
-          <span className="text-[9px] sm:text-[10px] font-black text-slate-400 block uppercase tracking-widest">Monthly_Fuel_Level</span>
+          <span className="text-[9px] sm:text-[10px] font-black text-slate-400 block uppercase tracking-widest">Monthly Fuel Level</span>
           <span className="text-lg sm:text-xl font-black font-mono text-indigo-600">{formatCurrency(stats.monthlyIncome, displayCurrency)}</span>
         </div>
       </div>
@@ -70,32 +70,31 @@ export const RuleValidation = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="relative pt-2">
               <ProgressBar percentage={r.val} color={r.color as any} />
               {r.label.includes('WANTS') && r.val > 30 && (
                 <div className="absolute -top-4 right-0">
-                  <Badge variant="rose" className="animate-bounce shadow-none text-[8px] py-0.5">Gilt_Detected</Badge>
+                  <Badge variant="rose" className="animate-bounce shadow-none text-[8px] py-0.5">Gilt Detected</Badge>
                 </div>
               )}
               {r.label.includes('SAVINGS') && r.val < 20 && (
                 <div className="absolute -top-4 right-0">
-                  <Badge variant="amber" className="text-[8px] py-0.5">Efficiency_Low</Badge>
+                  <Badge variant="amber" className="text-[8px] py-0.5">Efficiency Low</Badge>
                 </div>
               )}
             </div>
           </div>
         ))}
       </div>
-      
+
       <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">System_Status</span>
-        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-sm border ${
-          necP <= 50 && wantP <= 30 && saveP >= 20 
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-            : 'bg-slate-50 text-slate-600 border-slate-200'
-        }`}>
-          {necP <= 50 && wantP <= 30 && saveP >= 20 ? 'OPTIMIZED_ALLOCATION' : 'REBALANCING_REQUIRED'}
+        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">System Status</span>
+        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-sm border ${necP <= 50 && wantP <= 30 && saveP >= 20
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          : 'bg-slate-50 text-slate-600 border-slate-200'
+          }`}>
+          {necP <= 50 && wantP <= 30 && saveP >= 20 ? 'OPTIMIZED ALLOCATION' : 'REBALANCING REQUIRED'}
         </span>
       </div>
     </section>
