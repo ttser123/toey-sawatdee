@@ -18,6 +18,24 @@ const releaseNotes: ReleaseNote[] = [
   {
     date: 'May 8, 2026',
     isoDate: '2026-05-08',
+    title: 'Next.js SSR Migration & CloudFront Edge Infrastructure',
+    changes: [
+      '**Overview:** Completely tore down the legacy static hosting architecture and migrated to a production-grade, containerized Server-Side Rendering (SSR) environment on AWS EC2.',
+      '**Edge Delivery Network:** Fronted the EC2 instance with AWS CloudFront CDN to cache static assets globally, drastically reducing origin server load and slashing latency to ~50ms.',
+      '**Backdoor Origin Routing:** Engineered a custom DNS topology (`origin.toey-sawatdee.me`) to act as a secure backdoor for CloudFront, bypassing infinite routing loop traps.',
+      '**Reverse Proxy Implementation:** Configured Nginx as the primary gatekeeper on the EC2 instance, securely intercepting port 80 traffic and proxying it to the internal Docker network.',
+      '**Global HTTPS Encryption:** Enforced strict SSL/TLS encryption across the entire application by attaching an AWS ACM Certificate directly to the CloudFront edge network.',
+      '**Origin Protection:** Eliminated direct public IP access to the application container; all public traffic must now pass through CloudFront and Nginx security layers.',
+      '**Zero-Touch Deployment:** Engineered a fully automated CI/CD pipeline using GitHub Actions, triggering build, publish, and deployment sequences on main branch merges.',
+      '**Container Orchestration:** Integrated GitHub Container Registry (GHCR) and automated remote SSH commands to pull new images and restart containers.',
+      '**Aggressive Image Optimization:** Implemented multi-stage Docker builds utilizing Next.js standalone mode, reducing final production image size to under 70MB.',
+      '**Automated Cache Invalidation:** Integrated CloudFront cache invalidation (`/*`) directly into the deployment pipeline for real-time content updates.',
+      '**Deprecations:** Sunset the legacy AWS S3 static site hosting architecture and removed raw EC2 public IP addresses from primary DNS A Records.'
+    ]
+  },
+  {
+    date: 'May 8, 2026',
+    isoDate: '2026-05-08',
     title: 'Precision Finance Engine & Universal Morph UI',
     changes: [
       '**Universal Inline Morph UI:** Overhauled all ledgers (Assets, Income, Expenses, Goals) with in-place editing. Rows now "morph" into interactive input fields for rapid data adjustment without context switching.',

@@ -181,3 +181,15 @@ input[type=number] {
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* สร้างแพทเทิร์นจุดสีเทาอ่อน (slate-200) ระยะห่าง 24px */
+.bg-dot-pattern {
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* สร้างหน้ากาก (Mask) ไล่สีให้จุดค่อยๆ จางหายไปที่ขอบล่างของจอ */
+.mask-fade-out {
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}

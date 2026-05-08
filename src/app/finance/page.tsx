@@ -21,7 +21,7 @@ export default function FinancePage() {
     setHasHydrated(true);
   }, []);
 
-  if (!hasHydrated) return <div className="max-w-5xl mx-auto p-8 animate-pulse bg-blueprint h-screen" />;
+  if (!hasHydrated) return <div className="max-w-5xl mx-auto p-8 bg-slate-50/50 h-screen" />;
 
   const renderInputBuffer = () => {
     const components: Record<RecordTab, React.ReactNode> = {
@@ -32,7 +32,7 @@ export default function FinancePage() {
     };
 
     return (
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="space-y-8">
         <div className="flex flex-wrap gap-2">
           {(['assets', 'incomes', 'expenses', 'goals'] as RecordTab[]).map(tab => (
             <button
@@ -77,7 +77,7 @@ export default function FinancePage() {
       </nav>
 
       {activeMode === 'reality_check' ? (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="space-y-8">
           {/* ZONE A: TOP HUD */}
           <div className="w-full">
             <FinancialSummary />
