@@ -1,7 +1,7 @@
 services:
   frontend:
     container_name: toey-sawatdee
-    image: ghcr.io/https://github.com/ttser123/toey-sawatdee.git/toey-sawatdee:latest
+    image: ghcr.io/ttser123/toey-sawatdee/toey-sawatdee:latest
     ports:
       - "80:3000"
     env_file:
