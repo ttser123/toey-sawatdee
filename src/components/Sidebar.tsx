@@ -24,7 +24,6 @@ interface GameZone {
 
 const gameServerItems: GameZone[] = [
   { href: '/admin/games-server/zomboid', label: 'Project Zomboid', },
-  { href: '/admin/games-server/minecraft', label: 'Minecraft' },
   // ── Add more game servers / zones here ──
   // { href: '/admin/games-server/valheim', icon: 'shield', label: 'Valheim', zone: 'EU-W1' },
 ];

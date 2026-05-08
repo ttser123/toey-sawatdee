@@ -8,15 +8,14 @@ import HudHeader from '@/components/HudHeader';
 const getPageTitle = (pathname: string) => {
     if (pathname === '/') return 'OVERVIEW';
     if (pathname === '/finance') return 'FINANCE';
-    if (pathname === '/status') return 'SYSTEM_STATUS';
-    if (pathname === '/release-notes') return 'UPDATE_LOGS';
-    if (pathname.includes('/admin/games-server/zomboid')) return 'ZOMBOID_SERVER';
-    if (pathname.includes('/admin/games-server/minecraft')) return 'MINECRAFT_SERVER';
-    if (pathname === '/admin/admin-log') return 'ADMIN_LOG';
+    if (pathname === '/status') return 'SYSTEM STATUS';
+    if (pathname === '/release-notes') return 'UPDATE LOGS';
+    if (pathname.includes('/admin/games-server/zomboid')) return 'ZOMBOID';
+    if (pathname.includes('/admin/games-server/minecraft')) return 'MINECRAFT';
+    if (pathname.includes('/admin/admin-log')) return 'ADMIN LOG';
 
-    // Fallback
     const segments = pathname.split('/').filter(Boolean);
-    if (segments.length === 0) return 'DASHBOARD';
+    if (segments.length === 0) return 'OVERVIEW';
     return `${segments[segments.length - 1].toUpperCase()}`;
 };
 

@@ -39,9 +39,24 @@ function LoginForm() {
                 await refreshAuth();
                 router.replace(callbackUrl);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Login failed:', error);
-            setErrorMsg(error.message || 'Login failed');
+            
+            // Handle specific Cognito error types
+            const err = error as { name?: string; __type?: string; message?: string };
+            const errorName = err.name || err.__type || '';
+            
+            if (errorName === 'UserNotFoundException' || errorName === 'NotAuthorizedException') {
+                setErrorMsg('Invalid email or password. Please try again.');
+            } else if (errorName === 'UserNotConfirmedException') {
+                setErrorMsg('Your account is not confirmed. Please check your email.');
+            } else if (errorName === 'PasswordResetRequiredException') {
+                setErrorMsg('Password reset required. Please contact your administrator.');
+            } else if (errorName === 'LimitExceededException') {
+                setErrorMsg('Too many login attempts. Please try again later.');
+            } else {
+                setErrorMsg(err.message || 'An unexpected error occurred during login.');
+            }
         } finally {
             setSubmitting(false);
         }

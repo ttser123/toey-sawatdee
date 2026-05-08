@@ -43,7 +43,7 @@ export const RuleValidation = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-slate-800">
           <span className="material-symbols-outlined bg-slate-100 p-2 text-slate-600 rounded-sm">analytics</span>
-          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">50 30 20 Protocol</h2>
+          <h2 className="text-lg sm:text-xl font-bold uppercase tracking-tight text-slate-800">THE 50-30-20 PROTOCOL</h2>
         </div>
         <div className="sm:text-right">
           <span className="text-[9px] sm:text-[10px] font-black text-slate-400 block uppercase tracking-widest">Monthly Fuel Level</span>
