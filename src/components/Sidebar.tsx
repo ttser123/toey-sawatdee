@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
-import { FaGithub, FaLinkedin, FaEnvelope } from 'react-icons/fa';
+import { FaGithub, FaLinkedin, FaEnvelope, FaYoutube } from 'react-icons/fa';
 
 // ── Navigation Data ──────────────────────────────────────────────────
 
@@ -367,6 +367,15 @@ export default function Sidebar() {
                 title="LinkedIn"
               >
                 <FaLinkedin className="text-[20px]" />
+              </a>
+              <a
+                href="https://www.youtube.com/@toeysawatdee"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-rose-600 transition-colors"
+                title="YouTube"
+              >
+                <FaYoutube className="text-[20px]" />
               </a>
             </div>
 

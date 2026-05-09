@@ -11,17 +11,17 @@ export const useFinanceStats = () => {
     const getItemAmount = (item: { frequency: string, amount: number, targetMonth?: string }) => {
       if (item.frequency === 'monthly') return item.amount;
       if (!item.targetMonth) return 0;
-      
+
       // One-time: Exact match (Year and Month)
       if (item.frequency === 'one-time') {
         return item.targetMonth === viewMonth ? item.amount : 0;
       }
-      
+
       // Yearly: Month-only match (String manipulation to compare MM)
       if (item.frequency === 'yearly') {
         return item.targetMonth.slice(-2) === viewMonth.slice(-2) ? item.amount : 0;
       }
-      
+
       return 0;
     };
 
@@ -34,8 +34,8 @@ export const useFinanceStats = () => {
 
     const totalReserved = store.goals.reduce((acc, goal) => acc + (goal.savedAmount || 0), 0);
     const availableAssets = totalAssets - totalReserved;
-    const monthlyExpenses = breakdown.necessity + breakdown.want + breakdown.savings;
-    const runway = breakdown.necessity > 0 ? totalAssets / breakdown.necessity : 0;
+    const monthlyNecessity = breakdown.necessity;
+    const runway = monthlyNecessity > 0 ? availableAssets / monthlyNecessity : 0;
 
     const goalProgress = store.goals.map(goal => {
       const asset = store.assets.find(a => a.id === goal.linkedAssetId);
@@ -48,15 +48,15 @@ export const useFinanceStats = () => {
       };
     });
 
-    return { 
-      totalAssets, 
-      availableAssets, 
-      totalReserved, 
-      monthlyIncome, 
-      monthlyExpenses, 
-      breakdown, 
-      runway, 
-      goalProgress 
+    return {
+      totalAssets,
+      availableAssets,
+      totalReserved,
+      monthlyIncome,
+      monthlyExpenses: breakdown.necessity + breakdown.want + breakdown.savings,
+      breakdown,
+      runway,
+      goalProgress
     };
   }, [store.assets, store.incomes, store.expenses, store.goals, viewMonth]);
 
