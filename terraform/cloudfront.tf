@@ -50,7 +50,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "Toey Sawatdee Production CDN"
-  aliases             = ["toey-sawatdee.me"] 
+  aliases = ["toey-sawatdee.me", "www.toey-sawatdee.me"]
 
   origin {
     domain_name = aws_eip.app_eip.public_dns
