@@ -1,9 +1,0 @@
-services:
-  frontend:
-    container_name: toey-sawatdee
-    image: ghcr.io/ttser123/toey-sawatdee/toey-sawatdee:latest
-    ports:
-      - "127.0.0.1:3000:3000"
-    env_file:
-      - .env.local
-    restart: unless-stopped
