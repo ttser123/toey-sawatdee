@@ -61,6 +61,27 @@ resource "aws_instance" "app_server" {
   }
   
   subnet_id = aws_subnet.public.id
-  
   disable_api_termination = false
+
+  tags = {
+    Name = "toey-sawatdee-prod"
+  }
+}
+
+resource "aws_iam_role_policy" "ssm_parameter_read" {
+  name = "toey_read_ghcr_token"
+  role = aws_iam_role.ssm_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter"
+        ]
+        Resource = "arn:aws:ssm:*:*:parameter/toey-sawatdee/prod/ghcr-token"
+      }
+    ]
+  })
 }
