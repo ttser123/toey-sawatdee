@@ -65,3 +65,12 @@ jobs:
             --timeout-seconds 60 \
             --max-concurrency "50" \
             --max-errors "0"
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          DIST_ID=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?Aliases.Items[?contains(@,'toey-sawatdee.me')]].Id" \
+            --output text)
+          aws cloudfront create-invalidation \
+            --distribution-id "$DIST_ID" \
+            --paths "/*"
