@@ -42,9 +42,8 @@ data "aws_ec2_managed_prefix_list" "cloudfront" {
 }
 
 resource "aws_security_group" "ec2_sg" {
-  name        = "allow-cloudfront-only"
-  description = "Poor-man Zero Trust Security Group"
-  vpc_id      = aws_vpc.main.id
+  name   = "allow-cloudfront-only"
+  vpc_id = aws_vpc.main.id
 
   ingress {
     description     = "HTTP strictly from CloudFront"
@@ -60,4 +59,17 @@ resource "aws_security_group" "ec2_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_eip" "app_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "toey-static-ip"
+  }
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.app_server.id
+  allocation_id = aws_eip.app_eip.id
 }

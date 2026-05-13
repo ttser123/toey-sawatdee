@@ -43,8 +43,6 @@ next-env.d.ts
 
 # Local .terraform directories
 **/.terraform/*
-
-# .tfstate files (ห้ามเอาขึ้น Git เด็ดขาด! มันมี Secret!)
 *.tfstate
 *.tfstate.*
 

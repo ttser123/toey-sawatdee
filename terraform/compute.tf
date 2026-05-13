@@ -62,5 +62,5 @@ resource "aws_instance" "app_server" {
   
   subnet_id = aws_subnet.public.id
   
-  disable_api_termination = true
+  disable_api_termination = false
 }
