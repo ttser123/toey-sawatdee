@@ -54,8 +54,8 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --targets "Key=tag:Name,Values=toey-sawatdee-prod" \
             --parameters 'commands=[
-              "TOKEN=\$(aws ssm get-parameter --name /toey-sawatdee/prod/ghcr-token --with-decryption --query Parameter.Value --output text --region ap-southeast-2)",
-              "echo \$TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin",
+              "TOKEN=$(aws ssm get-parameter --name /toey-sawatdee/prod/ghcr-token --with-decryption --query Parameter.Value --output text --region ap-southeast-2)",
+              "echo $TOKEN | docker login ghcr.io -u ${{ github.actor }} --password-stdin",
               "docker pull ghcr.io/${{ github.repository }}/toey-sawatdee:latest",
               "docker stop toey-sawatdee || true",
               "docker rm toey-sawatdee || true",
