@@ -40,15 +40,15 @@ export function ArchitectureDetails() {
           items={[
             {
               label: "CloudFront",
-              description: "Caches static assets globally, slashing load times and offloading compute."
+              description: "Custom cache policy whitelisting RSC, next-router-prefetch, and next-router-state-tree headers to prevent cache poisoning across App Router payloads."
             },
             {
               label: "Route 53",
-              description: "Implemented origin isolation to bypass DNS loops, routing traffic safely to EC2."
+              description: "Origin isolation via origin.toey-sawatdee.me A-record pointing to Elastic IP, bypassing DNS loops for CloudFront-to-EC2 routing."
             },
             {
               label: "ACM",
-              description: "Enforced strict SSL/TLS encryption across the edge network."
+              description: "TLS 1.2+ enforced at the edge with SNI-only support, certificate sourced from us-east-1 for CloudFront compatibility."
             }
           ]}
         />
@@ -58,16 +58,16 @@ export function ArchitectureDetails() {
           subtitle="AWS EC2 (t3.micro)"
           items={[
             {
-              label: "Nginx",
-              description: "Primary gatekeeper managing headers and secure request proxying."
+              label: "Security Group",
+              description: "Port 80 ingress locked to CloudFront managed prefix list only — no SSH, no direct IP access."
             },
             {
               label: "Docker",
-              description: "Full environment isolation, standardizing production and local states."
+              description: "Full environment isolation, standalone Next.js output running on internal port 3000, mapped to host port 80."
             },
             {
               label: "Next.js SSR",
-              description: "Server-Side Rendering for dynamic routes and middleware authentication."
+              description: "Server-Side Rendering for dynamic routes with middleware-level authentication before page render."
             }
           ]}
         />
@@ -95,19 +95,40 @@ export function ArchitectureDetails() {
 
         <ZoneCard
           title="Zone 4: CI/CD Automation"
-          subtitle="Automated Deployment"
+          subtitle="Zero-SSH Deployment"
           items={[
             {
               label: "Multi-stage Build",
-              description: "Optimized standalone output reducing container image size to ~69MB."
+              description: "Optimized standalone output reducing container image size to ~69MB, pushed to GHCR."
             },
             {
               label: "GitHub Actions",
-              description: "Automated pipelines pushing to GHCR on every verified merge."
+              description: "Automated pipelines building Docker images and triggering deployment on every verified merge to main."
             },
             {
-              label: "SSH Orchestration",
-              description: "Direct host-level automation for zero-downtime service updates."
+              label: "SSM RunCommand",
+              description: "Zero-SSH deployment — EC2 pulls GHCR token from SSM Parameter Store, no SSH keys exist on the server."
+            }
+          ]}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ZoneCard
+          title="Zone 5: Infrastructure as Code"
+          subtitle="Terraform (AWS Provider 6.x)"
+          items={[
+            {
+              label: "VPC & Networking",
+              description: "Custom VPC (10.0.0.0/16), public subnet, Internet Gateway, and Elastic IP — all declared, versioned, and reproducible."
+            },
+            {
+              label: "Launch Template",
+              description: "Amazon Linux 2023 AMI auto-resolved to latest, with IAM instance profile for SSM and Parameter Store access."
+            },
+            {
+              label: "Immutable Infra",
+              description: "Entire stack — compute, CDN, DNS, IAM — managed as code. No manual console changes."
             }
           ]}
         />

@@ -5,18 +5,14 @@ export function HeroSection() {
   const categories = [
     { label: 'Frontend', techs: 'Next.js, TypeScript' },
     { label: 'Cloud', techs: 'AWS EC2, CloudFront, DynamoDB' },
-    { label: 'Network', techs: 'Nginx, Route 53' },
-    { label: 'DevOps', techs: 'Docker, GitHub Actions' },
-    { label: 'Security', techs: 'AWS Cognito, ACM' }
+    { label: 'Network', techs: 'VPC, Route 53, Elastic IP' },
+    { label: 'DevOps', techs: 'Docker, GitHub Actions, SSM' },
+    { label: 'IaC', techs: 'Terraform (AWS 6.x)' },
+    { label: 'Security', techs: 'Cognito, ACM, Prefix List SG' }
   ];
 
   return (
     <div className="card-blueprint p-6 sm:p-10 relative overflow-hidden group hover:border-indigo-300 transition-colors">
-      {/* Background Decoration */}
-      <div className="absolute -top-10 -right-10 opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
-        <span className="material-symbols-outlined text-[200px] text-indigo-600">architecture</span>
-      </div>
-
       <div className="relative z-10">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-4 tracking-tight">
           Web <span className="text-indigo-600 font-mono tracking-tighter">Architecture</span>

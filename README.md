@@ -3,7 +3,7 @@
 [![Deployment Status](https://github.com/ttser123/toey-sawatdee/actions/workflows/deploy.yml/badge.svg)](https://github.com/ttser123/toey-sawatdee/actions/workflows/deploy.yml)
 
 A production-grade portfolio engineered as a real-time system status dashboard — not a landing page.
-Built on AWS (EC2, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, Docker, and a custom Blueprint design system.
+Built on AWS (EC2, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, Docker, Terraform, and a custom Blueprint design system.
 
 [Live Demo → toey-sawatdee.me](https://toey-sawatdee.me)
 
@@ -11,7 +11,7 @@ Built on AWS (EC2, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, Docker, a
 
 ## System Architecture
 
-The infrastructure is organized into four operational zones:
+The infrastructure is organized into five operational zones, all managed as Terraform IaC:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -23,9 +23,9 @@ The infrastructure is organized into four operational zones:
 │  ZONE 1 — THE EDGE  (Global Delivery)                              │
 │                                                                     │
 │  Route 53 ──► CloudFront CDN ──► ACM (SSL/TLS)                     │
-│  • Origin isolation to bypass DNS loops                             │
-│  • Global static asset caching                                      │
-│  • Strict encryption across the edge network                        │
+│  • origin.* A-record → Elastic IP (DNS loop bypass)                │
+│  • RSC header whitelist cache policy (prevents cache poisoning)      │
+│  • TLS 1.2+ enforced, SNI-only, ACM cert from us-east-1            │
 └──────────────────────────┬──────────────────────────────────────────┘
                            │
               ┌────────────┴────────────┐
@@ -35,8 +35,8 @@ The infrastructure is organized into four operational zones:
 │  CORE                 │   │  (Decoupled Microservices)             │
 │  EC2 (t3.micro)       │   │                                        │
 │                       │   │  Cognito ─ Identity mgmt (JWT/SRP)     │
-│  Nginx (reverse proxy │   │  Lambda  ─ Async telemetry ingestion   │
-│    + header mgmt)     │   │  DynamoDB ─ On-demand NoSQL state      │
+│  SG: CloudFront-only  │   │  Lambda  ─ Async telemetry ingestion   │
+│    prefix list (P80)  │   │  DynamoDB ─ On-demand NoSQL state      │
 │  Docker (env isolation│   │                                        │
 │    + standalone build)│   │                                        │
 │  Next.js SSR          │   │                                        │
@@ -49,7 +49,15 @@ The infrastructure is organized into four operational zones:
 │                                                                     │
 │  Multi-stage Docker Build ─ Standalone output (~69MB image)         │
 │  GitHub Actions ─ Automated pipelines → GHCR on every merge        │
-│  SSH Orchestration ─ Direct host-level zero-downtime updates        │
+│  SSM RunCommand ─ Zero-SSH deployment, GHCR token from Param Store  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│  ZONE 5 — INFRASTRUCTURE AS CODE  (Terraform)                       │
+│                                                                     │
+│  AWS Provider 6.x ─ VPC, Subnet, IGW, Route Table                   │
+│  Launch Template ─ AL2023 AMI (auto-latest), IAM Instance Profile   │
+│  Immutable Infra ─ Entire stack declared, versioned, reproducible   │
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -66,15 +74,15 @@ The infrastructure is organized into four operational zones:
 
 ## Architectural Trade-offs & Security Decisions
 
-### OIDC Federation over Static AWS Keys
+### Zero-SSH Deployment via SSM
 
-The CI/CD pipeline authenticates to AWS via GitHub OIDC → STS AssumeRole, issuing short-lived tokens per deployment run. No AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are stored as long-lived secrets for deployment. This eliminates the risk of credential leakage from repository forks or compromised Actions runners.
+The CI/CD pipeline deploys via AWS Systems Manager RunCommand — no SSH keys exist on the server, no port 22 is open. The EC2 instance authenticates to GHCR by pulling a PAT token from SSM Parameter Store (encrypted at rest). GitHub Actions triggers SSM send-command targeting the instance by tag name, eliminating all stored SSH credentials.
 
 > Build-time env vars (e.g. NEXT_PUBLIC_API_URL) are still injected via GitHub Secrets but are embedded at build time — they contain no privileged credentials.
 
 ### EC2 + Docker over Serverless Static Export
 
-The application runs as a Dockerized Next.js SSR instance on EC2 (t3.micro) behind Nginx, rather than a static S3 export. This enables:
+The application runs as a Dockerized Next.js SSR instance on EC2 (t3.micro), rather than a static S3 export. This enables:
 
 - Server-Side Rendering for dynamic routes and real-time data
 - Middleware-level authentication checks before page render
@@ -82,13 +90,25 @@ The application runs as a Dockerized Next.js SSR instance on EC2 (t3.micro) behi
 
 The trade-off: a persistent compute instance (~$8/month) versus pay-per-request Lambda, but SSR capabilities and middleware auth justify the cost.
 
+### CloudFront Prefix List Security Group
+
+The EC2 security group allows HTTP (port 80) ingress **only** from the CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`). No SSH port, no direct IP access. This creates a locked perimeter where the only path to the application is through CloudFront.
+
+### RSC Cache Poisoning Prevention
+
+The CloudFront distribution uses a custom cache policy that whitelists `Accept`, `rsc`, `next-router-prefetch`, and `next-router-state-tree` headers as cache key parameters. Without this, CloudFront would serve the same cached response for both HTML page requests and RSC JSON payloads — silently breaking client-side navigation.
+
 ### Multi-stage Docker Build
 
 The production container uses a multi-stage build optimized for Next.js standalone output, reducing the final image size to ~69MB. This minimizes cold-start overhead and pull times during deployments.
 
 ### Origin Isolation via Route 53
 
-Route 53 is configured with origin isolation to bypass DNS resolution loops when CloudFront pulls from the EC2 origin. Traffic routes safely to the compute layer without circular CNAME chains.
+Route 53 is configured with an `origin.toey-sawatdee.me` A-record pointing directly to the Elastic IP. CloudFront uses this subdomain as its custom origin, bypassing DNS resolution loops that would occur if the main domain's CNAME pointed to CloudFront while CloudFront simultaneously tried to resolve it.
+
+### Infrastructure as Code (Terraform)
+
+The entire AWS infrastructure — VPC, subnet, Internet Gateway, route table, security group, EC2 launch template, Elastic IP, CloudFront distribution, Route 53 records, and IAM roles — is declared in Terraform (AWS Provider 6.x). No manual console changes. The stack is reproducible from a single `terraform apply`.
 
 ### Serverless Routing: GET vs POST Isolation
 
@@ -163,12 +183,13 @@ docker run -p 3000:3000 toey-sawatdee
 | Frontend | Next.js 16.2.4 (SSR), React 19.2.4, TypeScript 5.9.3, Tailwind CSS 4.2.4 |
 | Design System | Custom Blueprint aesthetic — graph-paper grid, tracing-paper cards, monospace metrics |
 | Auth | AWS Cognito (SRP + JWT) |
-| Compute | AWS EC2 (t3.micro), Nginx reverse proxy, Docker |
+| Compute | AWS EC2 (t3.micro), Docker, CloudFront prefix list SG |
+| IaC | Terraform (AWS Provider 6.x) |
 | Serverless API | AWS Lambda (Python 3.12) |
 | Database | AWS DynamoDB (On-Demand) |
-| CDN | AWS CloudFront |
+| CDN | AWS CloudFront (custom RSC cache policy) |
 | DNS/TLS | AWS Route 53 + ACM |
-| CI/CD | GitHub Actions → GHCR → SSH Orchestration (zero-downtime) |
+| CI/CD | GitHub Actions → GHCR → SSM RunCommand (zero-SSH) |
 | Game Telemetry | Node.js Guardian Agent on dedicated Linux server |
 
 ---
@@ -183,5 +204,7 @@ The following are excluded from version control via .gitignore:
 | *.pem | SSL/TLS certificates and private keys |
 | .agents/ | Local AI agent configuration and rules |
 | .next/, out/ | Build artifacts (reproducible from source) |
+| .terraform/, *.tfstate* | Terraform state and provider cache |
+| *.tfvars | Terraform variable files with sensitive values |
 
-No credentials, tokens, or secrets should ever be committed. AWS deployment authentication uses OIDC federation — no static keys exist in the repository.
+No credentials, tokens, or secrets should ever be committed. Deployment uses SSM RunCommand — no SSH keys exist on the server or in the repository. GHCR authentication is handled via SSM Parameter Store (encrypted).

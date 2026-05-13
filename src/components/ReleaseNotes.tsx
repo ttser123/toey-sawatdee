@@ -16,6 +16,26 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 13, 2026',
+    isoDate: '2026-05-13',
+    title: 'The Great Infrastructure Migration (IaC)',
+    changes: [
+      '**Migration to Terraform:** Transitioned all primary resource management to declarative Infrastructure as Code (HCL). The entire stack is now reproducible with a single `terraform apply` — eliminating manual console errors permanently.',
+      '**CloudFront Distribution Orchestration:** Rewrote the full `aws_cloudfront_distribution` block in Terraform to systematically link the CDN with the EC2 origin, enforcing consistent edge-to-origin routing.',
+      '**EC2 Identity Fix:** Resolved the "unnamed instance" problem by adding `tags` to `aws_instance` via Terraform, enabling precise CI/CD targeting by tag name instead of fragile instance IDs.',
+      '**The Origin Link:** Wired the Elastic IP public DNS directly as the CloudFront origin through IaC, bypassing Route 53 Free Tier management issues entirely.',
+      '**Resolved: 504 Gateway Timeout:** Fixed the CloudFront-to-EC2 pipeline blockage by setting `origin_protocol_policy` to `http-only` — the EC2 instance runs HTTP internally with TLS terminated at the edge.',
+      '**Next.js RSC Cache Poisoning Fix:** Prevented CloudFront from serving raw RSC JSON payloads as HTML by creating a custom Terraform-managed cache policy that whitelists `rsc`, `next-router-prefetch`, and `Accept` headers as cache key parameters.',
+      '**CNAME Conflict Resolution:** Cleaned up orphaned CNAME records left from manual console operations, allowing Terraform to assume full control of the `toey-sawatdee.me` domain mapping.',
+      '**Zero-Footprint Secret Management:** Eliminated exposed GitHub tokens from CI/CD logs by migrating to AWS SSM Parameter Store (SecureString) with KMS encryption at rest.',
+      '**IAM Least Privilege Implementation:** Authored a dedicated `ssm_parameter_read` policy in Terraform granting EC2 permission to self-retrieve the GHCR token (pull pattern) instead of receiving it externally (push pattern).',
+      '**GitHub Actions Shell Overhaul:** Fixed syntax errors in `aws ssm send-command` caused by incorrect backslash escaping. Enforced explicit `--region ap-southeast-2` on all SSM commands for deterministic execution.',
+      '**Cleanup:** Purged hardcoded AWS Access Keys from `userdata.sh` and `deploy.yml` — a critical security vulnerability that exposed credentials in plaintext.',
+      '**Value Proposition Design:** Introduced a new landing page section translating technical architecture into business outcomes (Security, Reliability, Performance, Cost) for non-technical stakeholders.',
+      '**Infrastructure Pipeline Flow:** Redesigned the data flow visualization with static SVG connectors replacing the unstable `getBoundingClientRect` dynamic path calculation.',
+    ]
+  },
+  {
     date: 'May 8, 2026',
     isoDate: '2026-05-08',
     title: 'Next.js SSR Migration & CloudFront Edge Infrastructure',
