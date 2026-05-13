@@ -34,18 +34,20 @@ function LoginForm() {
         setErrorMsg('');
 
         try {
-            const { isSignedIn } = await signIn({ username: email, password });
-            if (isSignedIn) {
+            const response = await signIn({ username: email, password });
+            console.log("AUTH RESPONSE:", response);
+
+            if (response.isSignedIn) {
                 await refreshAuth();
                 router.replace(callbackUrl);
             }
         } catch (error: unknown) {
             console.error('Login failed:', error);
-            
+
             // Handle specific Cognito error types
             const err = error as { name?: string; __type?: string; message?: string };
             const errorName = err.name || err.__type || '';
-            
+
             if (errorName === 'UserNotFoundException' || errorName === 'NotAuthorizedException') {
                 setErrorMsg('Invalid email or password. Please try again.');
             } else if (errorName === 'UserNotConfirmedException') {
