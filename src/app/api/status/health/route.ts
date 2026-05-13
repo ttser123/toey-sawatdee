@@ -12,12 +12,13 @@ interface HealthResult {
   app: { status: string; version: string; env: string };
 }
 
-async function probe(url: string, timeoutMs = 5000): Promise<{ ok: boolean; latency: number }> {
+async function probe(url: string, method: 'GET' | 'HEAD' = 'HEAD', timeoutMs = 5000): Promise<{ ok: boolean; latency: number }> {
   const start = Date.now();
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-    const res = await fetch(url, { method: 'HEAD', signal: ctrl.signal, cache: 'no-store' });
+    // เปลี่ยนจาก Hardcode 'HEAD' เป็นตัวแปร method
+    const res = await fetch(url, { method, signal: ctrl.signal, cache: 'no-store' });
     clearTimeout(timer);
     return { ok: res.ok || res.status === 405, latency: Date.now() - start };
   } catch {
@@ -42,7 +43,7 @@ export async function GET() {
   if (cognitoPoolId) {
     const region = cognitoPoolId.split('_')[0];
     const url = `https://cognito-idp.${region}.amazonaws.com/${cognitoPoolId}/.well-known/openid-configuration`;
-    const { ok, latency } = await probe(url);
+    const { ok, latency } = await probe(url, 'GET');
     results.cognito = { status: ok ? 'operational' : 'outage', latency };
   }
 
