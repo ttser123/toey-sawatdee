@@ -35,7 +35,6 @@ jobs:
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_COGNITO_USER_POOL_ID=${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
             NEXT_PUBLIC_COGNITO_CLIENT_ID=${{ secrets.NEXT_PUBLIC_COGNITO_CLIENT_ID }}
-            NEXT_PUBLIC_ZOMBOID_API_URL=${{ secrets.NEXT_PUBLIC_ZOMBOID_API_URL }}
 
   deploy-to-ec2:
     needs: build-and-push

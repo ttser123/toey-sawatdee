@@ -10,7 +10,6 @@ const getPageTitle = (pathname: string) => {
     if (pathname === '/finance') return 'FINANCE';
     if (pathname === '/status') return 'SYSTEM STATUS';
     if (pathname === '/release-notes') return 'UPDATE LOGS';
-    if (pathname.includes('/admin/games-server/zomboid')) return 'ZOMBOID';
     if (pathname.includes('/admin/admin-log')) return 'ADMIN LOG';
 
     const segments = pathname.split('/').filter(Boolean);
