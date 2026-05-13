@@ -40,3 +40,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .agents
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (ห้ามเอาขึ้น Git เด็ดขาด! มันมี Secret!)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Ignore any .tfvars files that are generated automatically
+*.tfvars

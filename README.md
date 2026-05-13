@@ -2,8 +2,8 @@
 
 [![Deployment Status](https://github.com/ttser123/toey-sawatdee/actions/workflows/deploy.yml/badge.svg)](https://github.com/ttser123/toey-sawatdee/actions/workflows/deploy.yml)
 
-A production-grade, serverless portfolio engineered as a real-time system status dashboard — not a landing page.
-Built on AWS (S3, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, and a custom Blueprint design system.
+A production-grade portfolio engineered as a real-time system status dashboard — not a landing page.
+Built on AWS (EC2, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, Docker, and a custom Blueprint design system.
 
 [Live Demo → toey-sawatdee.me](https://toey-sawatdee.me)
 
@@ -11,59 +11,55 @@ Built on AWS (S3, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, and a cust
 
 ## System Architecture
 
+The infrastructure is organized into four operational zones:
+
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │                          USER (Browser)                             │
 └──────────────────────────┬───────────────────────────────────────────┘
                            │ HTTPS
                            ▼
-                ┌─────────────────────┐
-                │   AWS CloudFront    │  ← CDN Edge (BKK / ap-southeast-2)
-                │   + CF Functions    │  ← URL Rewrite for SPA routing
-                └─────────┬───────────┘
-                          │
-              ┌───────────┴───────────┐
-              ▼                       ▼
-    ┌──────────────────┐    ┌──────────────────────┐
-    │   AWS S3 Bucket  │    │   AWS API Gateway    │
-    │  (Static Build)  │    │    (REST API)        │
-    │  next build → out│    └─────────┬────────────┘
-    └──────────────────┘              │
-                                      ▼
-                          ┌────────────────────────┐
-                          │   AWS Lambda (Python)   │
-                          │  • Visitor Counter API  │
-                          │  • Zomboid Telemetry    │
-                          └─────────┬──────────────┘
-                                    │
-                                    ▼
-                          ┌────────────────────────┐
-                          │   AWS DynamoDB         │
-                          │   (On-Demand Capacity) │
-                          └────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  ZONE 1 — THE EDGE  (Global Delivery)                              │
+│                                                                     │
+│  Route 53 ──► CloudFront CDN ──► ACM (SSL/TLS)                     │
+│  • Origin isolation to bypass DNS loops                             │
+│  • Global static asset caching                                      │
+│  • Strict encryption across the edge network                        │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              ▼                         ▼
+┌───────────────────────┐   ┌────────────────────────────────────────┐
+│  ZONE 2 — COMPUTE     │   │  ZONE 3 — SERVERLESS BACKEND          │
+│  CORE                 │   │  (Decoupled Microservices)             │
+│  EC2 (t3.micro)       │   │                                        │
+│                       │   │  Cognito ─ Identity mgmt (JWT/SRP)     │
+│  Nginx (reverse proxy │   │  Lambda  ─ Async telemetry ingestion   │
+│    + header mgmt)     │   │  DynamoDB ─ On-demand NoSQL state      │
+│  Docker (env isolation│   │                                        │
+│    + standalone build)│   │                                        │
+│  Next.js SSR          │   │                                        │
+│    (dynamic routes +  │   │                                        │
+│     middleware auth)   │   │                                        │
+└───────────────────────┘   └────────────────────────────────────────┘
 
-    ┌──────────────────────────────────────────────┐
-    │         Dedicated Game Server (Linux)         │
-    │  ┌────────────────────────────────────┐       │
-    │  │  Guardian Agent (Node.js)          │       │
-    │  │  • Polls game server every 60s     │       │
-    │  │  • Pushes telemetry to Lambda      │       │
-    │  │  • SIGINT/SIGTERM → final OFFLINE  │       │
-    │  └────────────────────────────────────┘       │
-    └──────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  ZONE 4 — CI/CD AUTOMATION  (Automated Deployment)                  │
+│                                                                     │
+│  Multi-stage Docker Build ─ Standalone output (~69MB image)         │
+│  GitHub Actions ─ Automated pipelines → GHCR on every merge        │
+│  SSH Orchestration ─ Direct host-level zero-downtime updates        │
+└─────────────────────────────────────────────────────────────────────┘
 
-    ┌──────────────────────────────────────────────┐
-    │         GitHub Actions (CI/CD)                │
-    │  • OIDC → STS AssumeRole (no static keys)    │
-    │  • npm build → S3 sync → CF invalidation     │
-    └──────────────────────────────────────────────┘
-
-    ┌──────────────────────────────────────────────┐
-    │         AWS Cognito (Authentication)          │
-    │  • SRP Auth (no password over the wire)       │
-    │  • JWT session management                     │
-    │  • Admin-only route protection                │
-    └──────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│  DEDICATED GAME SERVER  (Linux)                                     │
+│                                                                     │
+│  Guardian Agent (Node.js)                                           │
+│  • Polls game server every 60s                                      │
+│  • Pushes telemetry to Lambda                                       │
+│  • SIGINT/SIGTERM → final OFFLINE                                   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -74,7 +70,25 @@ Built on AWS (S3, CloudFront, Lambda, DynamoDB, Cognito), Next.js 16, and a cust
 
 The CI/CD pipeline authenticates to AWS via GitHub OIDC → STS AssumeRole, issuing short-lived tokens per deployment run. No AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY are stored as long-lived secrets for deployment. This eliminates the risk of credential leakage from repository forks or compromised Actions runners.
 
-> Build-time env vars (e.g. NEXT_PUBLIC_API_URL) are still injected via GitHub Secrets but are baked into static HTML at build time — they contain no privileged credentials.
+> Build-time env vars (e.g. NEXT_PUBLIC_API_URL) are still injected via GitHub Secrets but are embedded at build time — they contain no privileged credentials.
+
+### EC2 + Docker over Serverless Static Export
+
+The application runs as a Dockerized Next.js SSR instance on EC2 (t3.micro) behind Nginx, rather than a static S3 export. This enables:
+
+- Server-Side Rendering for dynamic routes and real-time data
+- Middleware-level authentication checks before page render
+- Full environment isolation via Docker containers, standardizing production and local states
+
+The trade-off: a persistent compute instance (~$8/month) versus pay-per-request Lambda, but SSR capabilities and middleware auth justify the cost.
+
+### Multi-stage Docker Build
+
+The production container uses a multi-stage build optimized for Next.js standalone output, reducing the final image size to ~69MB. This minimizes cold-start overhead and pull times during deployments.
+
+### Origin Isolation via Route 53
+
+Route 53 is configured with origin isolation to bypass DNS resolution loops when CloudFront pulls from the EC2 origin. Traffic routes safely to the compute layer without circular CNAME chains.
 
 ### Serverless Routing: GET vs POST Isolation
 
@@ -92,10 +106,6 @@ This keeps DynamoDB read/write costs under $1/month even under continuous pollin
 - The Guardian Agent on the game server pushes pre-aggregated metrics (peak players, avg ping, uptime) — raw server logs and filesystem paths never leave the host
 - The DecimalEncoder in Python Lambda prevents DynamoDB's Decimal type from crashing JSON serialization — a silent data corruption bug that only surfaces under load
 
-### CloudFront Functions over Lambda@Edge
-
-URL path rewriting for Next.js static export uses CloudFront Functions (sub-millisecond, $0.10/million) instead of Lambda@Edge ($0.60/million + cold start). The trade-off: no network/filesystem access in the rewrite logic — acceptable since we only need path manipulation.
-
 ---
 
 ## Local Development Setup
@@ -104,6 +114,7 @@ URL path rewriting for Next.js static export uses CloudFront Functions (sub-mill
 
 - Node.js 20+
 - npm 10+
+- Docker (optional, for production-like builds)
 
 ### Installation
 
@@ -127,7 +138,7 @@ NEXT_PUBLIC_ZOMBOID_API_URL=https://your-lambda-function-url.on.aws/
 AWS_REGION=ap-southeast-2
 ```
 
-> All NEXT_PUBLIC_* variables are embedded into the static build at compile time. They contain no privileged credentials — only public-facing API endpoints and Cognito pool identifiers.
+> All NEXT_PUBLIC_* variables are embedded into the build at compile time. They contain no privileged credentials — only public-facing API endpoints and Cognito pool identifiers.
 
 ### Run
 
@@ -136,20 +147,28 @@ npm run dev
 npm run build
 ```
 
+### Docker Build
+
+```bash
+docker build -t toey-sawatdee .
+docker run -p 3000:3000 toey-sawatdee
+```
+
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 16.2.4 (Static Export), React 19.2.4, TypeScript 5.9.3, Tailwind CSS 4.2.4 |
+| Frontend | Next.js 16.2.4 (SSR), React 19.2.4, TypeScript 5.9.3, Tailwind CSS 4.2.4 |
 | Design System | Custom Blueprint aesthetic — graph-paper grid, tracing-paper cards, monospace metrics |
 | Auth | AWS Cognito (SRP + JWT) |
-| API | AWS API Gateway -> Lambda (Python 3.12) |
+| Compute | AWS EC2 (t3.micro), Nginx reverse proxy, Docker |
+| Serverless API | AWS Lambda (Python 3.12) |
 | Database | AWS DynamoDB (On-Demand) |
-| CDN | AWS CloudFront + CloudFront Functions |
+| CDN | AWS CloudFront |
 | DNS/TLS | AWS Route 53 + ACM |
-| CI/CD | GitHub Actions -> OIDC -> S3 Sync -> CF Invalidation |
+| CI/CD | GitHub Actions → GHCR → SSH Orchestration (zero-downtime) |
 | Game Telemetry | Node.js Guardian Agent on dedicated Linux server |
 
 ---
