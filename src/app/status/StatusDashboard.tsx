@@ -113,18 +113,17 @@ export default function StatusDashboard() {
   const allStatuses = [cognitoStatus, cloudfrontStatus, apiStatus, appStatus];
   const overall: ServiceStatus =
     allStatuses.includes('outage') ? 'outage' :
-    allStatuses.includes('degraded') ? 'degraded' :
-    allStatuses.includes('checking') ? 'checking' : 'operational';
+      allStatuses.includes('degraded') ? 'degraded' :
+        allStatuses.includes('checking') ? 'checking' : 'operational';
 
   return (
     <div className="space-y-8 pb-12">
       {/* ── Overall Status Banner ──────────────────────────── */}
-      <div className={`flex items-center gap-3 rounded-sm border p-4 backdrop-blur-sm transition-colors ${
-        overall === 'operational' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-800' :
-        overall === 'degraded' ? 'bg-amber-50/80 border-amber-300 text-amber-800' :
-        overall === 'checking' ? 'bg-slate-50/80 border-slate-300 text-slate-800' :
-        'bg-rose-50/80 border-rose-300 text-rose-800'
-      }`}>
+      <div className={`flex items-center gap-3 rounded-sm border p-4 backdrop-blur-sm transition-colors ${overall === 'operational' ? 'bg-emerald-50/80 border-emerald-300 text-emerald-800' :
+          overall === 'degraded' ? 'bg-amber-50/80 border-amber-300 text-amber-800' :
+            overall === 'checking' ? 'bg-slate-50/80 border-slate-300 text-slate-800' :
+              'bg-rose-50/80 border-rose-300 text-rose-800'
+        }`}>
         <span className="relative inline-flex h-3 w-3 shrink-0">
           {overall === 'operational' && (
             <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 animate-radar-ping" />
@@ -134,9 +133,9 @@ export default function StatusDashboard() {
         <div className="flex-1">
           <p className="font-bold text-sm font-mono uppercase tracking-tight">
             {overall === 'operational' ? 'All Systems Operational' :
-             overall === 'degraded' ? 'Partial System Degradation' :
-             overall === 'checking' ? 'Checking System Status...' :
-             'Major System Outage'}
+              overall === 'degraded' ? 'Partial System Degradation' :
+                overall === 'checking' ? 'Checking System Status...' :
+                  'Major System Outage'}
           </p>
           {lastChecked && (
             <p className="text-[10px] opacity-70 mt-0.5 font-mono uppercase tracking-widest">
@@ -210,29 +209,6 @@ export default function StatusDashboard() {
                 <span className="text-xs font-mono text-slate-700">{item.value}</span>
               </div>
             ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Historical Uptime ─────────────────────────────── */}
-      <div className="card-blueprint overflow-hidden">
-        <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-200">
-          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono">Historical Uptime (Last 90 Days)</h3>
-        </div>
-        <div className="p-5">
-          <div className="flex gap-0.5 h-8">
-            {Array.from({ length: 90 }).map((_, i) => (
-              <div
-                key={i}
-                className={`flex-1 rounded-sm ${i > 85 ? 'bg-amber-400' : 'bg-emerald-400'} opacity-80 hover:opacity-100 transition-opacity cursor-pointer`}
-                title={`Day -${89-i}: ${i > 85 ? '99.5%' : '100%'} Uptime`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-[10px] text-slate-400 font-mono uppercase font-bold">
-            <span>90 Days Ago</span>
-            <span>99.98% Uptime</span>
-            <span>Today</span>
           </div>
         </div>
       </div>
