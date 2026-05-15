@@ -29,6 +29,7 @@ const gameServerItems: GameZone[] = [
 
 /** Bottom simple links */
 const bottomNav = [
+  { href: '/tools', icon: 'construction', label: 'Tools' },
   { href: '/status', icon: 'monitor_heart', label: 'Status' },
   { href: '/release-notes', icon: 'update', label: 'Release Notes' },
 ];
