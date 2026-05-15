@@ -31,11 +31,11 @@ const gameServerItems: GameZone[] = [
 const bottomNav = [
   { href: '/status', icon: 'monitor_heart', label: 'Status' },
   { href: '/release-notes', icon: 'update', label: 'Release Notes' },
-  { href: '/finance', icon: 'account_balance', label: 'Finance[Test]' },
 ];
 
 const adminNav = [
   { href: '/admin/admin-log', icon: 'dns', label: 'Admin Log' },
+  { href: '/admin/finance', icon: 'account_balance', label: 'Finance[Test]' },
 ];
 
 // ── A11y IDs ─────────────────────────────────────────────────────────

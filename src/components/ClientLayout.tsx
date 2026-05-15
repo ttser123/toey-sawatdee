@@ -7,7 +7,7 @@ import HudHeader from '@/components/HudHeader';
 
 const getPageTitle = (pathname: string) => {
     if (pathname === '/') return 'OVERVIEW';
-    if (pathname === '/finance') return 'FINANCE';
+    if (pathname === '/admin/finance') return 'FINANCE';
     if (pathname === '/status') return 'SYSTEM STATUS';
     if (pathname === '/release-notes') return 'UPDATE LOGS';
     if (pathname.includes('/admin/admin-log')) return 'ADMIN LOG';

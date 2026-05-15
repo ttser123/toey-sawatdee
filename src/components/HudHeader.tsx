@@ -20,7 +20,7 @@ export default function HudHeader({
 }: HudHeaderProps) {
   const pathname = usePathname();
   const store = useFinanceStore();
-  const isFinancePage = pathname === '/finance';
+  const isFinancePage = pathname === '/admin/finance';
   const isSynced = store.viewMonth === getCurrentMonth();
 
   const handleMonthChange = (offset: number) => {
