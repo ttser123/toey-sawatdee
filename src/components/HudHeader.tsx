@@ -14,7 +14,7 @@ interface HudHeaderProps {
 
 export default function HudHeader({
   title,
-  subtitle = 'System Active // Data Synced',
+  subtitle = 'System Active',
   statusLabel = 'ONLINE',
   children
 }: HudHeaderProps) {
@@ -61,7 +61,7 @@ export default function HudHeader({
 
             {/* TACTICAL PAGINATOR */}
             <div className="flex flex-1 sm:flex-initial items-center bg-white/70 backdrop-blur-sm p-1 rounded-sm border border-slate-300 sm:min-w-[180px] md:min-w-[200px] h-[52px]">
-              <button 
+              <button
                 onClick={() => handleMonthChange(-1)}
                 className="p-1.5 hover:bg-slate-100 rounded-sm text-slate-500 transition-colors flex items-center justify-center"
               >
@@ -70,20 +70,19 @@ export default function HudHeader({
 
               <div className="px-2 md:px-4 text-center flex-1">
                 <span className="text-[9px] font-black text-slate-400 block uppercase tracking-[0.2em] leading-none mb-1">View Period</span>
-                <span 
+                <span
                   onClick={() => !isSynced && store.setViewMonth(getCurrentMonth())}
-                  className={`text-xs md:text-sm font-black font-mono uppercase leading-none block transition-all ${
-                    isSynced 
-                      ? 'text-slate-800' 
+                  className={`text-xs md:text-sm font-black font-mono uppercase leading-none block transition-all ${isSynced
+                      ? 'text-slate-800'
                       : 'text-amber-500 cursor-pointer hover:text-amber-600 hover:underline decoration-2 underline-offset-4'
-                  }`}
+                    }`}
                   title={!isSynced ? "Sync with Current Month" : undefined}
                 >
                   {formatMonth(store.viewMonth)}
                 </span>
               </div>
 
-              <button 
+              <button
                 onClick={() => handleMonthChange(1)}
                 className="p-1.5 hover:bg-slate-100 rounded-sm text-slate-500 transition-colors flex items-center justify-center"
               >

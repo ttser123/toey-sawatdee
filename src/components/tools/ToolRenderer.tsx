@@ -14,7 +14,7 @@ const ToolSkeleton = () => (
  * Add new tools here using dynamic imports with { ssr: false }.
  */
 const TOOL_COMPONENTS: Record<string, any> = {
-    // Example: 'json-formatter': dynamic(() => import('@/components/tools/JsonFormatter'), { loading: () => <ToolSkeleton />, ssr: false }),
+    'subnet-solver': dynamic(() => import('@/components/tools/SubnetSolver'), { loading: () => <ToolSkeleton />, ssr: false }),
 };
 
 export default function ToolRenderer({ toolId }: { toolId: string }) {

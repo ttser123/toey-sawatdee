@@ -39,8 +39,8 @@ export default function FinancePage() {
               key={tab}
               onClick={() => setRecordTab(tab)}
               className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[9px] sm:text-[10px] font-black font-mono uppercase tracking-widest border transition-all ${recordTab === tab
-                  ? 'bg-slate-800 text-white border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.3)]'
-                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                ? 'bg-slate-800 text-white border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.3)]'
+                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
                 }`}
             >
               {tab}
@@ -66,8 +66,8 @@ export default function FinancePage() {
             key={mode.id}
             onClick={() => setActiveMode(mode.id as any)}
             className={`flex flex-1 sm:flex-none items-center justify-center gap-2 px-4 sm:px-6 py-2.5 text-[10px] sm:text-[11px] font-black font-mono uppercase tracking-widest transition-all border ${activeMode === mode.id
-                ? 'bg-indigo-600 text-white border-indigo-700 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.3)]'
-                : 'bg-white/50 text-slate-500 border-slate-300 hover:bg-slate-100'
+              ? 'bg-indigo-600 text-white border-indigo-700 shadow-[4px_4px_0px_0px_rgba(79,70,229,0.3)]'
+              : 'bg-white/50 text-slate-500 border-slate-300 hover:bg-slate-100'
               }`}
           >
             <span className="material-symbols-outlined text-sm">{mode.icon}</span>
@@ -103,9 +103,6 @@ export default function FinancePage() {
       )}
 
       <footer className="pt-12 border-t border-slate-200">
-        <p className="text-[10px] text-slate-400 font-mono uppercase tracking-[0.2em] leading-relaxed text-center">
-          Tactical Financial Interface // Ver 2.4.0 // System Ready
-        </p>
       </footer>
     </div>
   );

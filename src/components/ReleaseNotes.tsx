@@ -16,6 +16,21 @@ type ReleaseNote = {
 // ==========================================
 const releaseNotes: ReleaseNote[] = [
   {
+    date: 'May 16, 2026',
+    isoDate: '2026-05-16',
+    title: 'Subnet Collision Solver (v2.2.0)',
+    changes: [
+      '**Overview:** Launched a high-performance Network Infrastructure Utility to calculate and avoid IP Collision and Network Exhaustion for Local Environments (Docker/WSL) under dense Corporate Network or VPN constraints.',
+      '**Bitwise Range-Jumping Algorithm:** Engineered a core engine leveraging Unsigned Bitwise Operations (`>>> 0`) for near-instant performance—processing 5,000 occupied islands in ~2ms.',
+      '**True Lazy Evaluation:** Implemented a TypeScript Generator (`function*`) based architecture to yield only the first 5 candidates on demand, ensuring O(1) constant space complexity regardless of search space size.',
+      '**Strict Separation of Concerns (SoC):** Decoupled mathematical pure logic from the UI via a dedicated `useSubnetSolver` custom hook, enabling 100% automated test coverage.',
+      '**Dynamic Block Allocation:** Enabled customizable target block sizes from /16 to /28, allowing users to "request only what is needed" to preserve corporate network address space.',
+      '**Advanced Boundary Clamping:** Integrated security constraints that prevent the generator from leaking candidates into Public IP ranges.',
+      '**Target-Specific Configuration:** Synthesizes ready-to-use implementation code for Docker (`daemon.json`) across Windows, Mac, Linux, and WSL2 (`.wslconfig`).',
+      '**Tactical UI Design:** Designed a High-contrast Light Mode interface following the Blueprint Design System, featuring a progressive disclosure flow for configuration details.',
+    ]
+  },
+  {
     date: 'May 13, 2026',
     isoDate: '2026-05-13',
     title: 'The Great Infrastructure Migration (IaC)',
