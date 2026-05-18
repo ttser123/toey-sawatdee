@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { 
     ipToLong, 
     longToIp, 
@@ -35,15 +35,65 @@ export function useSubnetSolver() {
     const [candidateLimit, setCandidateLimit] = useState<number>(5);
     const [foundSubnets, setFoundSubnets] = useState<string[]>([]);
     const [selectedSubnet, setSelectedSubnet] = useState<string | null>(null);
-    const [result, setResult] = useState<SolverResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // Reactive constraint: WSL only runs on Windows
-    useEffect(() => {
-        if (service === 'wsl' && os !== 'windows') {
+    // Derived Result Configuration
+    const result = useMemo<SolverResult | null>(() => {
+        if (!selectedSubnet) return null;
+
+        const primarySubnet = selectedSubnet;
+        const alternatives = foundSubnets.filter(s => s !== selectedSubnet);
+        
+        let config = '';
+        let path = '';
+        let instructions = '';
+
+        if (service === 'wsl') {
+            config = `[wsl2]\nnetworkingMode=mirrored\n# Suggested: ${primarySubnet}`;
+            path = '%USERPROFILE%\\.wslconfig';
+            instructions = 'Run "wsl --shutdown" in PowerShell, then restart your terminal.';
+        } else if (service === 'docker') {
+            const dockerConfig = {
+                "default-address-pools": [
+                    { 
+                        "base": primarySubnet, 
+                        "size": targetCidr 
+                    }
+                ]
+            };
+            config = JSON.stringify(dockerConfig, null, 4);
+            
+            switch (os) {
+                case 'windows':
+                    path = '%USERPROFILE%\\.docker\\daemon.json';
+                    instructions = 'Restart Docker Desktop app after saving the file.';
+                    break;
+                case 'mac':
+                    path = '~/.docker/daemon.json (Or UI: Settings -> Docker Engine)';
+                    instructions = 'Click "Apply & Restart" in Docker Desktop, or restart the app completely.';
+                    break;
+                case 'linux':
+                    path = '/etc/docker/daemon.json';
+                    instructions = 'Run "sudo systemctl restart docker" in terminal.';
+                    break;
+            }
+        }
+
+        return { 
+            safeSubnet: primarySubnet, 
+            candidates: alternatives,
+            config, 
+            path, 
+            instructions 
+        };
+    }, [service, os, targetCidr, selectedSubnet, foundSubnets]);
+
+    const handleSetService = (s: Service) => {
+        setService(s);
+        if (s === 'wsl' && os !== 'windows') {
             setOs('windows');
         }
-    }, [service, os]);
+    };
 
     const addInterface = () => {
         setNetworks([...networks, { id: crypto.randomUUID(), ip: '', cidr: 24 }]);
@@ -64,7 +114,6 @@ export function useSubnetSolver() {
 
     const solve = () => {
         setError(null);
-        setResult(null);
         setFoundSubnets([]);
         setSelectedSubnet(null);
 
@@ -103,62 +152,15 @@ export function useSubnetSolver() {
 
         if (candidates.length > 0) {
             setFoundSubnets(candidates);
-            // Auto-select the first one by default but allow user to change
-            handleSelectSubnet(candidates[0], candidates);
+            // Auto-select the first one
+            setSelectedSubnet(candidates[0]);
         } else {
             setError("CRITICAL: Network exhaustion detected. Consult Admin.");
         }
     };
 
-    const handleSelectSubnet = (subnet: string, allCandidates: string[] = foundSubnets) => {
+    const handleSelectSubnet = (subnet: string) => {
         setSelectedSubnet(subnet);
-        generateOutput(subnet, allCandidates.filter(s => s !== subnet));
-    };
-
-    const generateOutput = (primarySubnet: string, alternatives: string[]) => {
-        const [baseIp] = primarySubnet.split('/');
-        const octets = baseIp.split('.');
-        const bip = `${octets[0]}.${octets[1]}.${octets[2]}.1/${targetCidr}`;
-        const poolBase = `${octets[0]}.${octets[1]}.0.0/16`;
-
-        let config = '';
-        let path = '';
-        let instructions = '';
-
-        if (service === 'wsl') {
-            config = `[wsl2]\nnetworkingMode=mirrored\n# Suggested: ${primarySubnet}`;
-            path = '%USERPROFILE%\\.wslconfig';
-            instructions = 'Run "wsl --shutdown" in PowerShell, then restart your terminal.';
-        } else if (service === 'docker') {
-            const dockerConfig = {
-                "bip": bip,
-                "default-address-pools": [{ "base": poolBase, "size": 24 }]
-            };
-            config = JSON.stringify(dockerConfig, null, 4);
-            
-            switch (os) {
-                case 'windows':
-                    path = '%USERPROFILE%\\.docker\\daemon.json';
-                    instructions = 'Restart Docker Desktop app after saving the file.';
-                    break;
-                case 'mac':
-                    path = '~/.docker/daemon.json (Or UI: Settings -> Docker Engine)';
-                    instructions = 'Click "Apply & Restart" in Docker Desktop, or restart the app completely.';
-                    break;
-                case 'linux':
-                    path = '/etc/docker/daemon.json';
-                    instructions = 'Run "sudo systemctl restart docker" in terminal.';
-                    break;
-            }
-        }
-
-        setResult({ 
-            safeSubnet: primarySubnet, 
-            candidates: alternatives,
-            config, 
-            path, 
-            instructions 
-        });
     };
 
     return {
@@ -171,7 +173,7 @@ export function useSubnetSolver() {
         selectedSubnet,
         result,
         error,
-        setService,
+        setService: handleSetService,
         setOs,
         setTargetCidr,
         setCandidateLimit,

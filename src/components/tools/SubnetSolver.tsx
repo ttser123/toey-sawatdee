@@ -140,10 +140,10 @@ export default function SubnetCollisionSolver() {
                                             disabled={isDisabled}
                                             onClick={() => setOs(t)}
                                             className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all border rounded-sm ${os === t
-                                                    ? 'bg-slate-800 text-white border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.3)]'
-                                                    : isDisabled
-                                                        ? 'bg-slate-50 text-slate-200 border-slate-100 cursor-not-allowed'
-                                                        : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
+                                                ? 'bg-slate-800 text-white border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,0.3)]'
+                                                : isDisabled
+                                                    ? 'bg-slate-50 text-slate-200 border-slate-100 cursor-not-allowed'
+                                                    : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
                                                 }`}
                                         >
                                             [{t}]
